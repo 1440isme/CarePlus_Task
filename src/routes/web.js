@@ -23,6 +23,11 @@ let initWebRoutes = (app) => {
     router.get('/reset-password', authController.getResetPasswordPage);
     router.post('/reset-password', authController.postResetPassword);
 
+
+    // User Profile Routes
+    router.get('/profile', homeController.getProfile);
+    router.post('/profile', homeController.postProfile);
+
     return app.use("/", router);
 }
 module.exports = initWebRoutes;
