@@ -18,20 +18,9 @@ let getCRUD = (req, res) => {
     return res.render("crud.ejs");
 };
 
-let postCRUD = async (req, res) => {
-    try {
-        await CRUDService.createNewUser(req.body);
-        return res.redirect("/get-crud");
-    } catch (e) {
-        console.log(e);
-        return res.status(500).send("Lỗi máy chủ");
-    }
-};
-
 let getFindAllCRUD = async (req, res) => {
     try {
-        let users = await CRUDService.getAllUsers();
-        return res.render("displayCRUD.ejs", { users });
+        return res.render("displayCRUD.ejs");
     } catch (e) {
         console.log(e);
         return res.status(500).send("Lỗi máy chủ");
@@ -43,46 +32,17 @@ let getEditCRUD = async (req, res) => {
         let id = req.query.id;
         if (!id) return res.redirect("/get-crud");
 
-        let user = await CRUDService.getUserInfoById(id);
-        if (!user) return res.redirect("/get-crud");
-
-        return res.render("editCRUD.ejs", { user });
+        return res.render("editCRUD.ejs", { userId: id });
     } catch (e) {
         console.log(e);
         return res.status(500).send("Lỗi máy chủ");
     }
 };
-
-let putCRUD = async (req, res) => {
-    try {
-        await CRUDService.updateUserData(req.body);
-        return res.redirect("/get-crud");
-    } catch (e) {
-        console.log(e);
-        return res.status(500).send("Lỗi máy chủ");
-    }
-};
-
-let deleteCRUD = async (req, res) => {
-    try {
-        let id = req.query.id;
-        if (id) await CRUDService.deleteUserById(id);
-        return res.redirect("/get-crud");
-    } catch (e) {
-        console.log(e);
-        return res.status(500).send("Lỗi máy chủ");
-    }
-};
-
-
 
 module.exports = {
     getHomePage: getHomePage,
     getAboutPage: getAboutPage,
     getCRUD: getCRUD,
     getFindAllCRUD: getFindAllCRUD,
-    postCRUD: postCRUD,
     getEditCRUD: getEditCRUD,
-    putCRUD: putCRUD,
-    deleteCRUD: deleteCRUD,
 };
