@@ -63,6 +63,45 @@ let getUserInfoById = (userId) => {
         }
     });
 }
+// Retrieve user by email
+const getUserInfoByEmail = async (email) => {
+  try {
+    const user = await db.User.findOne({ where: { email }, raw: true });
+    return user;
+  } catch (e) {
+    throw e;
+  }
+};
+
+// Update OTP and expiration for a user
+const updateUserOTP = async (email, otp, expiresAt) => {
+  try {
+    const user = await db.User.findOne({ where: { email } });
+    if (!user) throw new Error('User not found');
+    user.otpCode = otp;
+    user.otpExpiresAt = expiresAt;
+    await user.save();
+  } catch (e) {
+    throw e;
+  }
+};
+
+// Update password and set verified flag
+const updateUserPasswordAndVerify = async (email, newPassword) => {
+  try {
+    const user = await db.User.findOne({ where: { email } });
+    if (!user) throw new Error('User not found');
+    const hashed = await hashUserPassword(newPassword);
+    user.password = hashed;
+    user.isVerified = true;
+    user.otpCode = null;
+    user.otpExpiresAt = null;
+    await user.save();
+  } catch (e) {
+    throw e;
+  }
+};
+
 let updateUserData = (data) => {
     return new Promise(async (resolve, reject) => {
         try {
@@ -118,4 +157,7 @@ module.exports = {
     getUserInfoById: getUserInfoById,
     updateUserData: updateUserData,
     deleteUserById: deleteUserById,
+    getUserInfoByEmail: getUserInfoByEmail,
+    updateUserOTP: updateUserOTP,
+    updateUserPasswordAndVerify: updateUserPasswordAndVerify,
 }
