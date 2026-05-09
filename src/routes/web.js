@@ -1,5 +1,6 @@
 import express from "express";
 import homeController from "../controllers/homeController";
+import authController from "../controllers/authController";
 
 let router = express.Router();
 
@@ -15,6 +16,13 @@ let initWebRoutes = (app) => {
     router.get('/edit-crud', homeController.getEditCRUD);
     router.post('/put-crud', homeController.putCRUD);
     router.get('/delete-crud', homeController.deleteCRUD);
+
+    // Auth routes (Forgot Password)
+    router.get('/forgot-password', authController.getForgotPasswordPage);
+    router.post('/forgot-password', authController.postForgotPassword);
+    router.get('/reset-password', authController.getResetPasswordPage);
+    router.post('/reset-password', authController.postResetPassword);
+
     return app.use("/", router);
 }
 module.exports = initWebRoutes;
