@@ -10,6 +10,11 @@ module.exports = {
                 primaryKey: true,
                 type: Sequelize.INTEGER
             },
+            username: {
+                type: Sequelize.STRING,
+                allowNull: true,
+                unique: true
+            },
             email: {
                 type: Sequelize.STRING,
                 allowNull: false,
@@ -50,6 +55,29 @@ module.exports = {
             isVerified: {
                 type: Sequelize.BOOLEAN,
                 defaultValue: false
+            },
+            isActive: {
+                type: Sequelize.BOOLEAN,
+                allowNull: false,
+                defaultValue: true
+            },
+            isLocked: {
+                type: Sequelize.BOOLEAN,
+                allowNull: false,
+                defaultValue: false
+            },
+            failedLoginAttempts: {
+                type: Sequelize.INTEGER,
+                allowNull: false,
+                defaultValue: 0
+            },
+            lockUntil: {
+                type: Sequelize.DATE,
+                allowNull: true
+            },
+            lastLoginAt: {
+                type: Sequelize.DATE,
+                allowNull: true
             },
             otpCode: {
                 type: Sequelize.STRING,

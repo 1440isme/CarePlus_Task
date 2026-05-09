@@ -9,6 +9,11 @@ module.exports = (sequelize, DataTypes) => {
     }
     User.init({
         // --- Nhóm xác thực & Bảo mật ---
+        username: {
+            type: DataTypes.STRING,
+            allowNull: true,
+            unique: true
+        },
         email: {
             type: DataTypes.STRING,
             allowNull: false,
@@ -44,6 +49,29 @@ module.exports = (sequelize, DataTypes) => {
         isVerified: {
             type: DataTypes.BOOLEAN,
             defaultValue: false // Mặc định chưa kích hoạt cho đến khi nhập đúng OTP mail
+        },
+        isActive: {
+            type: DataTypes.BOOLEAN,
+            defaultValue: true,
+            allowNull: false
+        },
+        isLocked: {
+            type: DataTypes.BOOLEAN,
+            defaultValue: false,
+            allowNull: false
+        },
+        failedLoginAttempts: {
+            type: DataTypes.INTEGER,
+            defaultValue: 0,
+            allowNull: false
+        },
+        lockUntil: {
+            type: DataTypes.DATE,
+            allowNull: true
+        },
+        lastLoginAt: {
+            type: DataTypes.DATE,
+            allowNull: true
         },
         otpCode: {
             type: DataTypes.STRING,
