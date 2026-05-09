@@ -15,6 +15,11 @@ let initWebRoutes = (app) => {
     router.get('/edit-crud', homeController.getEditCRUD);
     router.post('/put-crud', homeController.putCRUD);
     router.get('/delete-crud', homeController.deleteCRUD);
+    
+    // User Profile Routes
+    router.get('/profile', homeController.getProfile);
+    router.post('/profile', homeController.postProfile);
+
     return app.use("/", router);
 }
 module.exports = initWebRoutes;
