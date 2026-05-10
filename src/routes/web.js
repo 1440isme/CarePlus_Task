@@ -18,6 +18,7 @@ let initWebRoutes = (app) => {
     router.get('/crud', homeController.getCRUD);
     router.get('/get-crud', homeController.getFindAllCRUD);
     router.get('/edit-crud', homeController.getEditCRUD);
+    router.get('/admin/profile', profileController.getAdminProfilePage);
     router.get('/user/profile', profileController.getUserProfilePage);
 
     app.use("/", authRoutes);

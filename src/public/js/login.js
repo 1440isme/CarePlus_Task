@@ -23,7 +23,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (window.CarePlusAuth.getToken()) {
         window.CarePlusAuth.getCurrentUser().then((user) => {
             if (user) {
-                window.location.href = user.role === "admin" ? "/get-crud" : "/user/profile";
+                window.location.href = user.role === "admin" ? "/admin/profile" : "/user/profile";
             }
         });
     }

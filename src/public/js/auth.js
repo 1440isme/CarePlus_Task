@@ -33,17 +33,19 @@
 
     const updateNavbar = (user) => {
         const loginButton = document.getElementById("loginNavButton");
+        const registerButton = document.getElementById("registerNavButton");
         const userDropdown = document.getElementById("userNavDropdown");
         const userLabel = document.getElementById("navUserLabel");
         const userProfileLink = document.getElementById("userProfileNavLink");
         const adminUsersLink = document.getElementById("adminUsersNavLink");
 
-        if (!loginButton || !userDropdown || !userLabel || !userProfileLink || !adminUsersLink) {
+        if (!loginButton || !registerButton || !userDropdown || !userLabel || !userProfileLink || !adminUsersLink) {
             return;
         }
 
         if (!user) {
             loginButton.classList.remove("d-none");
+            registerButton.classList.remove("d-none");
             userDropdown.classList.add("d-none");
             userProfileLink.classList.add("d-none");
             adminUsersLink.classList.add("d-none");
@@ -51,13 +53,16 @@
         }
 
         loginButton.classList.add("d-none");
+        registerButton.classList.add("d-none");
         userDropdown.classList.remove("d-none");
         userLabel.textContent = user.username || user.email || "Tài khoản";
 
         if (user.role === "admin") {
+            userProfileLink.href = "/admin/profile";
             adminUsersLink.classList.remove("d-none");
-            userProfileLink.classList.add("d-none");
+            userProfileLink.classList.remove("d-none");
         } else {
+            userProfileLink.href = "/user/profile";
             userProfileLink.classList.remove("d-none");
             adminUsersLink.classList.add("d-none");
         }
@@ -122,7 +127,7 @@
         }
 
         if (requiredRole && user.role !== requiredRole) {
-            window.location.href = user.role === "admin" ? "/get-crud" : "/user/profile";
+            window.location.href = user.role === "admin" ? "/admin/profile" : "/user/profile";
             return null;
         }
 

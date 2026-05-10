@@ -140,7 +140,7 @@ const sanitizeUser = (user) => {
 };
 
 const buildRedirectUrlByRole = (role) => {
-    return role === "admin" ? "/get-crud" : "/user/profile";
+    return role === "admin" ? "/admin/profile" : "/user/profile";
 };
 
 const buildLoginError = (message, statusCode = 400) => {
