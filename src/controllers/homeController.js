@@ -18,20 +18,9 @@ let getCRUD = (req, res) => {
     return res.render("crud.ejs");
 };
 
-let postCRUD = async (req, res) => {
-    try {
-        await CRUDService.createNewUser(req.body);
-        return res.redirect("/get-crud");
-    } catch (e) {
-        console.log(e);
-        return res.status(500).send("Lỗi máy chủ");
-    }
-};
-
 let getFindAllCRUD = async (req, res) => {
     try {
-        let users = await CRUDService.getAllUsers();
-        return res.render("displayCRUD.ejs", { users });
+        return res.render("displayCRUD.ejs");
     } catch (e) {
         console.log(e);
         return res.status(500).send("Lỗi máy chủ");
@@ -39,6 +28,24 @@ let getFindAllCRUD = async (req, res) => {
 };
 
 let getEditCRUD = async (req, res) => {
+    try {
+        let id = req.query.id;
+        if (!id) return res.redirect("/get-crud");
+
+        return res.render("editCRUD.ejs", { userId: id });
+    } catch (e) {
+        console.log(e);
+        return res.status(500).send("Lỗi máy chủ");
+    }
+};
+
+module.exports = {
+    getHomePage: getHomePage,
+    getAboutPage: getAboutPage,
+    getCRUD: getCRUD,
+    getFindAllCRUD: getFindAllCRUD,
+    getEditCRUD: getEditCRUD,
+};
     try {
         let id = req.query.id;
         if (!id) return res.redirect("/get-crud");
