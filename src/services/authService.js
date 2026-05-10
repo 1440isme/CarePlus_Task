@@ -11,6 +11,7 @@ const TEMP_LOCK_MINUTES = 15;
 const MIN_PASSWORD_LENGTH = 6;
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const TEMP_PASSWORD_PLACEHOLDER = "__PENDING_VERIFICATION__";
+const MAX_OTP_FAILED_ATTEMPTS = 5;
 
 const generateOTP = () => {
     return Math.floor(10000 + Math.random() * 90000).toString();
@@ -38,6 +39,7 @@ let sendVerificationCode = async (email, username) => {
     if (user) {
         user.otpCode = otpCode;
         user.otpExpiresAt = otpExpiresAt;
+        user.failedLoginAttempts = 0;
         await user.save();
     } else {
         // Nếu chưa có user, tạo user tạm với email và OTP (chưa xác thực)
@@ -48,6 +50,7 @@ let sendVerificationCode = async (email, username) => {
             otpExpiresAt,
             isVerified: false,
             isActive: true,
+            failedLoginAttempts: 0,
         });
     }
     await mailService.sendVerificationEmail(normalizedEmail, otpCode, OTP_EXPIRE_MINUTES);
@@ -79,10 +82,29 @@ let registerUser = async ({ username, email, password, verificationCode }) => {
     if (user.isVerified) {
         throw buildLoginError("Email đã được đăng ký và xác thực.", 409);
     }
-    if (!user.otpCode || !user.otpExpiresAt || user.otpCode !== normalizedVerificationCode) {
-        throw buildLoginError("Mã xác thực không đúng.", 400);
+    if (!user.otpCode || !user.otpExpiresAt) {
+        throw buildLoginError("Mã xác thực hiện không còn hiệu lực. Vui lòng bấm 'Gửi lại mã'.", 410);
+    }
+    if (user.otpCode !== normalizedVerificationCode) {
+        user.failedLoginAttempts = (user.failedLoginAttempts || 0) + 1;
+
+        if (user.failedLoginAttempts >= MAX_OTP_FAILED_ATTEMPTS) {
+            user.otpCode = null;
+            user.otpExpiresAt = null;
+            user.failedLoginAttempts = 0;
+            await user.save();
+            throw buildLoginError("Bạn đã nhập sai mã xác thực 5 lần. Mã cũ đã bị hủy, vui lòng bấm 'Gửi lại mã'.", 429);
+        }
+
+        await user.save();
+        const remainingAttempts = MAX_OTP_FAILED_ATTEMPTS - user.failedLoginAttempts;
+        throw buildLoginError(`Mã xác thực không đúng. Bạn còn ${remainingAttempts} lần thử.`, 400);
     }
     if (new Date(user.otpExpiresAt) < new Date()) {
+        user.otpCode = null;
+        user.otpExpiresAt = null;
+        user.failedLoginAttempts = 0;
+        await user.save();
         throw buildLoginError("Mã xác thực đã hết hạn.", 410);
     }
     // Kiểm tra username trùng
@@ -97,6 +119,7 @@ let registerUser = async ({ username, email, password, verificationCode }) => {
     user.isVerified = true;
     user.otpCode = null;
     user.otpExpiresAt = null;
+    user.failedLoginAttempts = 0;
     await user.save();
     return { success: true, message: "Đăng ký thành công!" };
 };
