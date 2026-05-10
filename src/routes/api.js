@@ -4,6 +4,9 @@ import userApiController from "../controllers/userApiController";
 
 let router = express.Router();
 
+router.get("/api/profile/me", authMiddleware.verifyToken, userApiController.getMyProfile);
+router.put("/api/profile/me", authMiddleware.verifyToken, userApiController.updateMyProfile);
+
 router.use("/api/users", authMiddleware.verifyToken, authMiddleware.requireRole("admin"));
 router.get("/api/users", userApiController.getAllUsers);
 router.get("/api/users/:id", userApiController.getUserById);
