@@ -167,6 +167,10 @@ document.addEventListener("DOMContentLoaded", function () {
         }, 1000);
       } else {
         showError(data.message || "Đăng ký thất bại.");
+        if (res.status === 410 || res.status === 429) {
+          registerForm.verificationCode.value = "";
+          registerForm.verificationCode.focus();
+        }
       }
     } catch (err) {
       showError("Lỗi kết nối máy chủ.");
