@@ -70,6 +70,44 @@ let updateUser = async (req, res) => {
     }
 };
 
+let getMyProfile = async (req, res) => {
+    try {
+        const user = await CRUDService.getUserInfoById(req.user.id);
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "Không tìm thấy người dùng",
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            user,
+        });
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Không thể lấy hồ sơ người dùng",
+        });
+    }
+};
+
+let updateMyProfile = async (req, res) => {
+    try {
+        const updatedUser = await CRUDService.updateOwnProfile(req.user.id, req.body);
+        return res.status(200).json({
+            success: true,
+            message: "Cập nhật hồ sơ thành công",
+            user: updatedUser,
+        });
+    } catch (error) {
+        return res.status(400).json({
+            success: false,
+            message: error.message || "Không thể cập nhật hồ sơ",
+        });
+    }
+};
+
 let deleteUser = async (req, res) => {
     try {
         await CRUDService.deleteUserById(req.params.id);
@@ -90,5 +128,7 @@ module.exports = {
     getUserById,
     createUser,
     updateUser,
+    getMyProfile,
+    updateMyProfile,
     deleteUser,
 };
