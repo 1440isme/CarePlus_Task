@@ -2,10 +2,104 @@ import bcrypt from "bcryptjs";
 import { Op } from "sequelize";
 import db from "../models/index";
 import jwtUtils from "../utils/jwt";
+import mailService from "./mailService";
 
+const OTP_LENGTH = 5;
+const OTP_EXPIRE_MINUTES = 5;
 const MAX_FAILED_ATTEMPTS = 5;
 const TEMP_LOCK_MINUTES = 15;
+const MIN_PASSWORD_LENGTH = 6;
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const TEMP_PASSWORD_PLACEHOLDER = "__PENDING_VERIFICATION__";
+
+const generateOTP = () => {
+    return Math.floor(10000 + Math.random() * 90000).toString();
+};
+
+let sendVerificationCode = async (email, username) => {
+    const normalizedEmail = (email || "").trim();
+    const normalizedUsername = (username || "").trim();
+    if (!normalizedEmail || !EMAIL_REGEX.test(normalizedEmail)) {
+        throw buildLoginError("Email không hợp lệ", 400);
+    }
+    if (!normalizedUsername) {
+        throw buildLoginError("Username không được để trống", 400);
+    }
+    const usernameExists = await db.User.findOne({ where: { username: normalizedUsername } });
+    if (usernameExists) {
+        throw buildLoginError("Username đã tồn tại.", 409);
+    }
+    const user = await db.User.findOne({ where: { email: normalizedEmail } });
+    if (user && user.isVerified) {
+        throw buildLoginError("Email đã được đăng ký và xác thực.", 409);
+    }
+    const otpCode = generateOTP();
+    const otpExpiresAt = new Date(Date.now() + OTP_EXPIRE_MINUTES * 60 * 1000);
+    if (user) {
+        user.otpCode = otpCode;
+        user.otpExpiresAt = otpExpiresAt;
+        await user.save();
+    } else {
+        // Nếu chưa có user, tạo user tạm với email và OTP (chưa xác thực)
+        await db.User.create({
+            email: normalizedEmail,
+            password: bcrypt.hashSync(TEMP_PASSWORD_PLACEHOLDER, 10),
+            otpCode,
+            otpExpiresAt,
+            isVerified: false,
+            isActive: true,
+        });
+    }
+    await mailService.sendVerificationEmail(normalizedEmail, otpCode, OTP_EXPIRE_MINUTES);
+    return { success: true, message: "Mã xác thực đã được gửi tới email." };
+};
+
+let registerUser = async ({ username, email, password, verificationCode }) => {
+    const normalizedUsername = (username || "").trim();
+    const normalizedEmail = (email || "").trim();
+    const normalizedPassword = password || "";
+    const normalizedVerificationCode = (verificationCode || "").trim();
+
+    if (!normalizedUsername || !normalizedEmail || !normalizedPassword || !normalizedVerificationCode) {
+        throw buildLoginError("Vui lòng nhập đầy đủ thông tin", 400);
+    }
+    if (!EMAIL_REGEX.test(normalizedEmail)) {
+        throw buildLoginError("Email không hợp lệ", 400);
+    }
+    if (normalizedPassword.length < MIN_PASSWORD_LENGTH) {
+        throw buildLoginError(`Mật khẩu phải có ít nhất ${MIN_PASSWORD_LENGTH} ký tự`, 400);
+    }
+    if (!/^\d{5}$/.test(normalizedVerificationCode)) {
+        throw buildLoginError("Mã xác thực không hợp lệ", 400);
+    }
+    const user = await db.User.findOne({ where: { email: normalizedEmail } });
+    if (!user) {
+        throw buildLoginError("Bạn cần nhận mã xác thực trước.", 404);
+    }
+    if (user.isVerified) {
+        throw buildLoginError("Email đã được đăng ký và xác thực.", 409);
+    }
+    if (!user.otpCode || !user.otpExpiresAt || user.otpCode !== normalizedVerificationCode) {
+        throw buildLoginError("Mã xác thực không đúng.", 400);
+    }
+    if (new Date(user.otpExpiresAt) < new Date()) {
+        throw buildLoginError("Mã xác thực đã hết hạn.", 410);
+    }
+    // Kiểm tra username trùng
+    const usernameExists = await db.User.findOne({ where: { username: normalizedUsername } });
+    if (usernameExists) {
+        throw buildLoginError("Username đã tồn tại.", 409);
+    }
+    // Hash password
+    const hashedPassword = bcrypt.hashSync(normalizedPassword, 10);
+    user.username = normalizedUsername;
+    user.password = hashedPassword;
+    user.isVerified = true;
+    user.otpCode = null;
+    user.otpExpiresAt = null;
+    await user.save();
+    return { success: true, message: "Đăng ký thành công!" };
+};
 
 const sanitizeUser = (user) => {
     return {
@@ -125,4 +219,6 @@ module.exports = {
     loginUser,
     getCurrentUser,
     buildRedirectUrlByRole,
+    sendVerificationCode,
+    registerUser,
 };
