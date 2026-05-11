@@ -37,9 +37,10 @@
         const userDropdown = document.getElementById("userNavDropdown");
         const userLabel = document.getElementById("navUserLabel");
         const userProfileLink = document.getElementById("userProfileNavLink");
+        const userProfileEditLink = document.getElementById("userProfileEditNavLink");
         const adminUsersLink = document.getElementById("adminUsersNavLink");
 
-        if (!loginButton || !registerButton || !userDropdown || !userLabel || !userProfileLink || !adminUsersLink) {
+        if (!loginButton || !registerButton || !userDropdown || !userLabel || !userProfileLink || !userProfileEditLink || !adminUsersLink) {
             return;
         }
 
@@ -48,6 +49,7 @@
             registerButton.classList.remove("d-none");
             userDropdown.classList.add("d-none");
             userProfileLink.classList.add("d-none");
+            userProfileEditLink.classList.add("d-none");
             adminUsersLink.classList.add("d-none");
             return;
         }
@@ -61,9 +63,12 @@
             userProfileLink.href = "/admin/profile";
             adminUsersLink.classList.remove("d-none");
             userProfileLink.classList.remove("d-none");
+            userProfileEditLink.classList.add("d-none");
         } else {
             userProfileLink.href = "/user/profile";
             userProfileLink.classList.remove("d-none");
+            userProfileEditLink.href = "/user/profile/edit";
+            userProfileEditLink.classList.remove("d-none");
             adminUsersLink.classList.add("d-none");
         }
     };

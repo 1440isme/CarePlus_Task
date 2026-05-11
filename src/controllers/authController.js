@@ -1,4 +1,7 @@
 import authService from "../services/authService";
+import CRUDService from "../services/CRUDService";
+
+const { sendOTPEmail } = require("../utils/emailSender");
 
 let getLoginPage = (req, res) => {
     return res.render("login.ejs");
@@ -38,7 +41,6 @@ let getCurrentSession = async (req, res) => {
     }
 };
 
-// Gửi mã xác thực qua email
 let sendVerificationCode = async (req, res) => {
     try {
         const { email, username } = req.body;
@@ -52,7 +54,6 @@ let sendVerificationCode = async (req, res) => {
     }
 };
 
-// Đăng ký tài khoản
 let register = async (req, res) => {
     try {
         const { username, email, password, verificationCode } = req.body;
@@ -63,71 +64,82 @@ let register = async (req, res) => {
             success: false,
             message: error.message || "Đăng ký thất bại",
         });
-const CRUDService = require("../services/CRUDService");
-const { sendOTPEmail } = require("../utils/emailSender");
+    }
+};
 
-// Forgot password flow
 let getForgotPasswordPage = (req, res) => {
-    return res.render('forgotPassword.ejs');
+    return res.render("forgotPassword.ejs");
 };
 
 let postForgotPassword = async (req, res) => {
-    const { email } = req.body;
-    console.log(">>> Request forgot password for email:", email);
+    const email = (req.body.email || "").trim();
+
     try {
         const user = await CRUDService.getUserInfoByEmail(email);
         if (!user) {
-            console.log(">>> User not found");
-            return res.render('forgotPassword.ejs', { error: 'Email không tồn tại' });
+            return res.render("forgotPassword.ejs", { error: "Email không tồn tại" });
         }
-        
-        console.log(">>> Generating OTP...");
-        const otp = Math.floor(100000 + Math.random() * 900000).toString();
-        const expires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
-        
-        await CRUDService.updateUserOTP(email, otp, expires);
-        console.log(">>> OTP saved to DB:", otp);
 
-        console.log(">>> Sending email...");
-        try {
-            await sendOTPEmail(email, otp);
-            console.log(">>> Email sent successfully");
-            return res.render('resetPassword.ejs', { email });
-        } catch (mailError) {
-            console.error(">>> Error sending email:", mailError);
-            return res.render('forgotPassword.ejs', { 
-                error: 'Không thể gửi email lúc này. Vui lòng kiểm tra lại cấu hình SMTP trong file .env' 
-            });
-        }
-    } catch (e) {
-        console.error(">>> Global Error in postForgotPassword:", e);
-        return res.status(500).send('Lỗi máy chủ');
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+
+        await CRUDService.updateUserOTP(email, otp, expiresAt);
+        await sendOTPEmail(email, otp);
+
+        return res.render("resetPassword.ejs", { email });
+    } catch (error) {
+        return res.render("forgotPassword.ejs", {
+            error: "Không thể gửi email lúc này. Vui lòng thử lại sau.",
+        });
     }
 };
 
 let getResetPasswordPage = (req, res) => {
-    // This page is rendered after OTP is sent; no extra logic needed.
-    return res.render('resetPassword.ejs');
+    return res.render("resetPassword.ejs", {
+        email: (req.query.email || "").trim(),
+    });
 };
 
 let postResetPassword = async (req, res) => {
-    const { email, otp, newPassword } = req.body;
+    const email = (req.body.email || "").trim();
+    const otp = (req.body.otp || "").trim();
+    const newPassword = req.body.newPassword || "";
+    const confirmPassword = req.body.confirmPassword || "";
+
     try {
         const user = await CRUDService.getUserInfoByEmail(email);
-        if (!user) return res.render('resetPassword.ejs', { error: 'Email không tồn tại', email: email });
-        
-        if (user.otpCode !== otp || new Date(user.otpExpiresAt) < new Date()) {
-            return res.render('resetPassword.ejs', { 
-                error: 'OTP không hợp lệ hoặc đã hết hạn',
-                email: email // Pass email back so it doesn't disappear from the form
+        if (!user) {
+            return res.render("resetPassword.ejs", {
+                error: "Email không tồn tại",
+                email,
             });
         }
-        // Update password and mark verified
+
+        if (!otp || user.otpCode !== otp || !user.otpExpiresAt || new Date(user.otpExpiresAt) < new Date()) {
+            return res.render("resetPassword.ejs", {
+                error: "OTP không hợp lệ hoặc đã hết hạn",
+                email,
+            });
+        }
+
+        if (!newPassword || newPassword.length < 6) {
+            return res.render("resetPassword.ejs", {
+                error: "Mật khẩu mới phải có ít nhất 6 ký tự",
+                email,
+            });
+        }
+
+        if (newPassword !== confirmPassword) {
+            return res.render("resetPassword.ejs", {
+                error: "Mật khẩu xác nhận không khớp",
+                email,
+            });
+        }
+
         await CRUDService.updateUserPasswordAndVerify(email, newPassword);
-        return res.redirect('/login'); // assume login route exists
-    } catch (e) {
-        console.log(e);
-        return res.status(500).send('Lỗi máy chủ');
+        return res.redirect("/login");
+    } catch (error) {
+        return res.status(500).send("Lỗi máy chủ");
     }
 };
 
@@ -138,8 +150,8 @@ module.exports = {
     getCurrentSession,
     sendVerificationCode,
     register,
-    getForgotPasswordPage: getForgotPasswordPage,
-    postForgotPassword: postForgotPassword,
-    getResetPasswordPage: getResetPasswordPage,
-    postResetPassword: postResetPassword,
+    getForgotPasswordPage,
+    postForgotPassword,
+    getResetPasswordPage,
+    postResetPassword,
 };
