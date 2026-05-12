@@ -251,10 +251,100 @@ let getCurrentUser = async (userId) => {
     return sanitizeUser(user);
 };
 
+let forgotPassword = async (email) => {
+    const normalizedEmail = (email || "").trim();
+    if (!normalizedEmail || !EMAIL_REGEX.test(normalizedEmail)) {
+        throw buildLoginError("Email không hợp lệ", 400);
+    }
+
+    const user = await db.User.findOne({ where: { email: normalizedEmail } });
+    if (!user) {
+        throw buildLoginError("Email không tồn tại trong hệ thống.", 404);
+    }
+    
+    if (!user.isActive || user.isLocked) {
+        throw buildLoginError("Tài khoản đã bị khóa hoặc vô hiệu hóa", 403);
+    }
+
+    const otpCode = generateOTP();
+    const otpExpiresAt = new Date(Date.now() + OTP_EXPIRE_MINUTES * 60 * 1000);
+
+    user.otpCode = otpCode;
+    user.otpExpiresAt = otpExpiresAt;
+    user.failedLoginAttempts = 0;
+    await user.save();
+
+    await mailService.sendForgotPasswordEmail(normalizedEmail, otpCode, OTP_EXPIRE_MINUTES);
+    return { success: true, message: "Mã xác thực khôi phục mật khẩu đã được gửi tới email." };
+};
+
+let resetPassword = async ({ email, otpCode, newPassword }) => {
+    const normalizedEmail = (email || "").trim();
+    const normalizedOtpCode = (otpCode || "").trim();
+    const normalizedPassword = newPassword || "";
+
+    if (!normalizedEmail || !normalizedOtpCode || !normalizedPassword) {
+        throw buildLoginError("Vui lòng nhập đầy đủ thông tin", 400);
+    }
+    if (!EMAIL_REGEX.test(normalizedEmail)) {
+        throw buildLoginError("Email không hợp lệ", 400);
+    }
+    if (normalizedPassword.length < MIN_PASSWORD_LENGTH) {
+        throw buildLoginError(`Mật khẩu mới phải có ít nhất ${MIN_PASSWORD_LENGTH} ký tự`, 400);
+    }
+    if (!/^\d{5}$/.test(normalizedOtpCode)) {
+        throw buildLoginError("Mã xác thực không hợp lệ", 400);
+    }
+
+    const user = await db.User.findOne({ where: { email: normalizedEmail } });
+    if (!user) {
+        throw buildLoginError("Người dùng không tồn tại.", 404);
+    }
+
+    if (!user.otpCode || !user.otpExpiresAt) {
+        throw buildLoginError("Mã xác thực hiện không còn hiệu lực. Vui lòng bấm 'Gửi lại mã'.", 410);
+    }
+
+    if (user.otpCode !== normalizedOtpCode) {
+        user.failedLoginAttempts = (user.failedLoginAttempts || 0) + 1;
+
+        if (user.failedLoginAttempts >= MAX_OTP_FAILED_ATTEMPTS) {
+            user.otpCode = null;
+            user.otpExpiresAt = null;
+            user.failedLoginAttempts = 0;
+            await user.save();
+            throw buildLoginError("Bạn đã nhập sai mã xác thực 5 lần. Mã cũ đã bị hủy, vui lòng bấm 'Gửi lại mã'.", 429);
+        }
+
+        await user.save();
+        const remainingAttempts = MAX_OTP_FAILED_ATTEMPTS - user.failedLoginAttempts;
+        throw buildLoginError(`Mã xác thực không đúng. Bạn còn ${remainingAttempts} lần thử.`, 400);
+    }
+
+    if (new Date(user.otpExpiresAt) < new Date()) {
+        user.otpCode = null;
+        user.otpExpiresAt = null;
+        user.failedLoginAttempts = 0;
+        await user.save();
+        throw buildLoginError("Mã xác thực đã hết hạn.", 410);
+    }
+
+    const hashedPassword = bcrypt.hashSync(normalizedPassword, 10);
+    user.password = hashedPassword;
+    user.otpCode = null;
+    user.otpExpiresAt = null;
+    user.failedLoginAttempts = 0;
+    await user.save();
+
+    return { success: true, message: "Đổi mật khẩu thành công! Bạn có thể đăng nhập bằng mật khẩu mới." };
+};
+
 module.exports = {
     loginUser,
     getCurrentUser,
     buildRedirectUrlByRole,
     sendVerificationCode,
     registerUser,
+    forgotPassword,
+    resetPassword,
 };

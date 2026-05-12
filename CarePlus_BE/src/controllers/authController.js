@@ -56,9 +56,37 @@ let register = async (req, res) => {
     }
 };
 
+let forgotPassword = async (req, res) => {
+    try {
+        const { email } = req.body;
+        const result = await authService.forgotPassword(email);
+        return res.status(200).json(result);
+    } catch (error) {
+        return res.status(error.statusCode || 500).json({
+            success: false,
+            message: error.message || "Yêu cầu khôi phục mật khẩu thất bại",
+        });
+    }
+};
+
+let resetPassword = async (req, res) => {
+    try {
+        const { email, otpCode, newPassword } = req.body;
+        const result = await authService.resetPassword({ email, otpCode, newPassword });
+        return res.status(200).json(result);
+    } catch (error) {
+        return res.status(error.statusCode || 500).json({
+            success: false,
+            message: error.message || "Khôi phục mật khẩu thất bại",
+        });
+    }
+};
+
 module.exports = {
     login,
     getCurrentSession,
     sendVerificationCode,
     register,
+    forgotPassword,
+    resetPassword,
 };

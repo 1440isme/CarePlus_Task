@@ -45,6 +45,24 @@ export const registerApi = (payload) => {
 };
 
 /**
+ * Yêu cầu khôi phục mật khẩu
+ * POST /api/forgot-password
+ * @param {Object} payload - { email }
+ */
+export const forgotPasswordApi = (payload) => {
+    return axios.post("/api/forgot-password", payload);
+};
+
+/**
+ * Đặt lại mật khẩu
+ * POST /api/reset-password
+ * @param {Object} payload - { email, otpCode, newPassword }
+ */
+export const resetPasswordApi = (payload) => {
+    return axios.post("/api/reset-password", payload);
+};
+
+/**
  * Lấy thông tin phiên đăng nhập hiện tại
  * GET /auth/me
  */
