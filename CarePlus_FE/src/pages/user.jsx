@@ -12,6 +12,25 @@ const GENDER_OPTIONS = [
     { value: "false", label: "Nữ" },
 ];
 
+const normalizeGenderValue = (value) => {
+    if (value === true || value === 1 || value === "1" || value === "true") {
+        return true;
+    }
+
+    if (value === false || value === 0 || value === "0" || value === "false") {
+        return false;
+    }
+
+    return null;
+};
+
+const getGenderSelectValue = (value) => {
+    const normalized = normalizeGenderValue(value);
+    if (normalized === true) return "true";
+    if (normalized === false) return "false";
+    return "";
+};
+
 const UserProfilePage = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
@@ -56,7 +75,7 @@ const UserProfilePage = () => {
                         lastName: u.lastName || "",
                         phone: u.phone || "",
                         address: u.address || "",
-                        gender: u.gender === true ? "true" : u.gender === false ? "false" : "",
+                        gender: getGenderSelectValue(u.gender),
                         avatar: u.avatar || "",
                     });
                 }
@@ -80,7 +99,7 @@ const UserProfilePage = () => {
             lastName: profile.lastName || "",
             phone: profile.phone || "",
             address: profile.address || "",
-            gender: profile.gender === true ? "true" : profile.gender === false ? "false" : "",
+            gender: getGenderSelectValue(profile.gender),
             avatar: profile.avatar || "",
         });
         setIsEditing(false);
@@ -128,8 +147,9 @@ const UserProfilePage = () => {
     };
 
     const getGenderLabel = (g) => {
-        if (g === true) return "Nam";
-        if (g === false) return "Nữ";
+        const normalized = normalizeGenderValue(g);
+        if (normalized === true) return "Nam";
+        if (normalized === false) return "Nữ";
         return "Không xác định";
     };
 

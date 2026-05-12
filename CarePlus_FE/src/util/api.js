@@ -33,3 +33,23 @@ export const loginApi = (credentials) => {
 export const getCurrentSession = () => {
     return axios.get("/auth/me");
 };
+
+export const getAllUsers = () => {
+    return axios.get("/api/users");
+};
+
+export const getUserById = (userId) => {
+    return axios.get(`/api/users/${userId}`);
+};
+
+export const createUserApi = (data) => {
+    return axios.post("/api/users", data);
+};
+
+export const updateUserApi = (userId, data) => {
+    return axios.put(`/api/users/${userId}`, data);
+};
+
+export const deleteUserApi = (userId) => {
+    return axios.delete(`/api/users/${userId}`);
+};

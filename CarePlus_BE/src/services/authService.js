@@ -136,6 +136,7 @@ const sanitizeUser = (user) => {
         isActive: user.isActive,
         isLocked: user.isLocked,
         lastLoginAt: user.lastLoginAt,
+        redirectUrl: buildRedirectUrlByRole(user.role),
     };
 };
 
@@ -185,6 +186,10 @@ let loginUser = async ({ login, password }) => {
         throw buildLoginError("Username/email và mật khẩu không được để trống", 400);
     }
 
+    if (normalizedPassword.length < MIN_PASSWORD_LENGTH) {
+        throw buildLoginError(`Mật khẩu phải có ít nhất ${MIN_PASSWORD_LENGTH} ký tự`, 400);
+    }
+
     if (normalizedLogin.includes("@") && !EMAIL_REGEX.test(normalizedLogin)) {
         throw buildLoginError("Email đăng nhập không đúng định dạng", 400);
     }
@@ -196,6 +201,10 @@ let loginUser = async ({ login, password }) => {
 
     if (!user.isActive || user.isLocked) {
         throw buildLoginError("Tài khoản đã bị khóa hoặc vô hiệu hóa", 403);
+    }
+
+    if (!user.isVerified) {
+        throw buildLoginError("Tài khoản chưa được xác thực", 403);
     }
 
     if (user.lockUntil && new Date(user.lockUntil) > new Date()) {
@@ -233,6 +242,10 @@ let getCurrentUser = async (userId) => {
 
     if (!user) {
         throw buildLoginError("Không tìm thấy người dùng", 404);
+    }
+
+    if (!user.isVerified) {
+        throw buildLoginError("Tài khoản chưa được xác thực", 403);
     }
 
     return sanitizeUser(user);
