@@ -4,6 +4,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { fetchCurrentUser } from "./store/slices/authSlice";
 import Header from "./components/layout/header";
 import LoginPage from "./pages/login";
+import RegisterPage from "./pages/register";
 import AdminUsersPage from "./pages/adminUsers";
 import UserProfilePage from "./pages/user";
 
@@ -82,6 +83,15 @@ const AppRoutes = () => {
                         element={
                             <PublicOnlyRoute>
                                 <LoginPage />
+                            </PublicOnlyRoute>
+                        }
+                    />
+
+                    <Route
+                        path="/register"
+                        element={
+                            <PublicOnlyRoute>
+                                <RegisterPage />
                             </PublicOnlyRoute>
                         }
                     />

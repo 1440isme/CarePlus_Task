@@ -1,7 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { logout } from "../../store/slices/authSlice";
-import { UserOutlined, LogoutOutlined, LoginOutlined } from "@ant-design/icons";
+import { UserOutlined, LogoutOutlined, LoginOutlined, UserAddOutlined } from "@ant-design/icons";
 
 const Header = () => {
     const navigate = useNavigate();
@@ -65,9 +65,14 @@ const Header = () => {
                             </button>
                         </>
                     ) : (
-                        <Link to="/login" id="btn-login-nav" className="btn btn--primary btn--sm">
-                            <LoginOutlined /> Đăng nhập
-                        </Link>
+                        <>
+                            <Link to="/register" className="btn btn--outline btn--sm">
+                                <UserAddOutlined /> Đăng ký
+                            </Link>
+                            <Link to="/login" id="btn-login-nav" className="btn btn--primary btn--sm">
+                                <LoginOutlined /> Đăng nhập
+                            </Link>
+                        </>
                     )}
                 </div>
             </div>
