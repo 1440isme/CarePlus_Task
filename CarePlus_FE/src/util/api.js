@@ -27,6 +27,24 @@ export const loginApi = (credentials) => {
 };
 
 /**
+ * Gửi mã xác thực đăng ký
+ * POST /api/send-verification-code
+ * @param {Object} payload - { email, username }
+ */
+export const sendVerificationCodeApi = (payload) => {
+    return axios.post("/api/send-verification-code", payload);
+};
+
+/**
+ * Đăng ký tài khoản mới
+ * POST /api/register
+ * @param {Object} payload - { username, email, password, verificationCode }
+ */
+export const registerApi = (payload) => {
+    return axios.post("/api/register", payload);
+};
+
+/**
  * Lấy thông tin phiên đăng nhập hiện tại
  * GET /auth/me
  */

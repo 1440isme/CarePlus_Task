@@ -9,6 +9,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const registerSuccess = document.getElementById("registerSuccess");
   const passwordToggleButtons = document.querySelectorAll("[data-toggle-password]");
   const lockedFieldNames = ["username", "email", "password", "confirmPassword"];
+  const verificationCode_length = 5;
   let codeCooldown = 0;
   let cooldownInterval;
 
@@ -60,8 +61,8 @@ document.addEventListener("DOMContentLoaded", function () {
       if (!values.verificationCode) {
         return "Vui lòng nhập mã xác thực.";
       }
-      if (!/^\d{5}$/.test(values.verificationCode)) {
-        return "Mã xác thực phải gồm 5 chữ số.";
+      if (!new RegExp(`^\\d{${verificationCode_length}}$`).test(values.verificationCode)) {
+        return `Mã xác thực phải gồm ${verificationCode_length} chữ số.`;
       }
     }
 
