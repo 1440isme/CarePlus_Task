@@ -19,6 +19,10 @@ const Header = () => {
         return full || user.username || "";
     };
 
+    const getProfileRoute = () => {
+        return user?.role === "admin" ? "/admin/profile" : "/user/profile";
+    };
+
     return (
         <header className="app-header">
             <div className="app-header__inner">
@@ -32,7 +36,10 @@ const Header = () => {
                 <nav className="app-header__nav">
                     <Link to="/" className="nav-link">Trang chủ</Link>
                     {isAuthenticated && (
-                        <Link to="/user/profile" className="nav-link">Hồ sơ</Link>
+                        <Link to={getProfileRoute()} className="nav-link">Hồ sơ</Link>
+                    )}
+                    {isAuthenticated && user?.role === "admin" && (
+                        <Link to="/admin/users" className="nav-link">Người dùng</Link>
                     )}
                 </nav>
 
@@ -40,7 +47,7 @@ const Header = () => {
                 <div className="app-header__actions">
                     {isAuthenticated ? (
                         <>
-                            <Link to="/user/profile" className="header-user" id="header-user-profile">
+                            <Link to={getProfileRoute()} className="header-user" id="header-user-profile">
                                 <span className="header-user__avatar">
                                     {user?.avatar
                                         ? <img src={user.avatar} alt="avatar" />

@@ -14,6 +14,33 @@ const parseBooleanField = (value) => {
     return value === "1" || value === 1 || value === true || value === "true";
 };
 
+const normalizeBooleanOutput = (value) => {
+    if (value === "" || value === null || typeof value === "undefined") {
+        return null;
+    }
+
+    if (value === true || value === 1 || value === "1" || value === "true") {
+        return true;
+    }
+
+    if (value === false || value === 0 || value === "0" || value === "false") {
+        return false;
+    }
+
+    return null;
+};
+
+const normalizeUserOutput = (user) => {
+    if (!user) {
+        return user;
+    }
+
+    return {
+        ...user,
+        gender: normalizeBooleanOutput(user.gender),
+    };
+};
+
 let hashUserPassword = async (password) => {
     return bcrypt.hashSync(password, salt);
 };
@@ -43,19 +70,23 @@ let createNewUser = async (data) => {
 };
 
 let getAllUsers = async () => {
-    return db.User.findAll({
+    const users = await db.User.findAll({
         attributes: safeUserAttributes,
         raw: true,
         order: [["id", "DESC"]],
     });
+
+    return users.map(normalizeUserOutput);
 };
 
 let getUserInfoById = async (userId) => {
-    return db.User.findOne({
+    const user = await db.User.findOne({
         where: { id: userId },
         attributes: safeUserAttributes,
         raw: true,
     });
+
+    return normalizeUserOutput(user);
 };
 
 let getUserInfoByEmail = async (email) => {
