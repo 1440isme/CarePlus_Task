@@ -5,6 +5,7 @@ import { fetchCurrentUser } from "./store/slices/authSlice";
 import Header from "./components/layout/header";
 import LoginPage from "./pages/login";
 import RegisterPage from "./pages/register";
+import ForgotPasswordPage from "./pages/forgotPassword";
 import AdminUsersPage from "./pages/adminUsers";
 import UserProfilePage from "./pages/user";
 
@@ -92,6 +93,15 @@ const AppRoutes = () => {
                         element={
                             <PublicOnlyRoute>
                                 <RegisterPage />
+                            </PublicOnlyRoute>
+                        }
+                    />
+
+                    <Route
+                        path="/forgot-password"
+                        element={
+                            <PublicOnlyRoute>
+                                <ForgotPasswordPage />
                             </PublicOnlyRoute>
                         }
                     />

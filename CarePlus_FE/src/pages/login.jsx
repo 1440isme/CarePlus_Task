@@ -182,6 +182,7 @@ const LoginPage = () => {
                         </form>
 
                         <p className="auth-card__footer">
+                            <Link to="/forgot-password" style={{ display: 'block', marginBottom: '8px' }}>Quên mật khẩu?</Link>
                             Chưa có tài khoản? <Link to="/">Quay về trang chủ</Link>
                         </p>
                     </div>

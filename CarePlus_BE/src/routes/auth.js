@@ -8,6 +8,8 @@ let router = express.Router();
 // Đăng ký và xác thực
 router.post("/api/send-verification-code", authController.sendVerificationCode);
 router.post("/api/register", authController.register);
+router.post("/api/forgot-password", authController.forgotPassword);
+router.post("/api/reset-password", authController.resetPassword);
 
 router.post("/auth/login", rateLimitMiddleware.loginRateLimiter, authController.login);
 router.get("/auth/me", authMiddleware.verifyToken, authController.getCurrentSession);

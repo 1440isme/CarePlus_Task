@@ -20,9 +20,8 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-const sendVerificationEmail = async (to, otpCode, expireMinutes) => {
-  const subject = "Xác thực tài khoản CarePlus của bạn";
-  const text = `Xin chào,\n\nCảm ơn bạn đã đăng ký tài khoản tại CarePlus.\nĐể hoàn tất quá trình đăng ký, vui lòng sử dụng mã xác thực (OTP) dưới đây:\n\nMã xác thực của bạn: ${otpCode}\nMã này sẽ hết hạn sau ${expireMinutes} phút.\n\nVui lòng không chia sẻ mã này với bất kỳ ai để đảm bảo an toàn cho tài khoản của bạn.\nNếu bạn không thực hiện yêu cầu này, bạn có thể bỏ qua email này.\n\nTrân trọng,\nĐội ngũ CarePlus\n\nEmail này được gửi tự động, vui lòng không trả lời lại.`;
+// Hàm gửi email chung dùng chung cho các chức năng khác
+const sendEmail = async (to, subject, text) => {
   const mailOptions = {
     from: process.env.SMTP_FROM || process.env.SMTP_USER,
     to,
@@ -31,7 +30,7 @@ const sendVerificationEmail = async (to, otpCode, expireMinutes) => {
   };
   try {
     await transporter.sendMail(mailOptions);
-    console.log(`[MAIL] Đã gửi email xác thực tới: ${to}`);
+    console.log(`[MAIL] Đã gửi email tới: ${to}`);
     return true;
   } catch (err) {
     console.error("Lỗi gửi email:", {
@@ -42,20 +41,26 @@ const sendVerificationEmail = async (to, otpCode, expireMinutes) => {
       responseCode: err.responseCode,
       to,
     });
-    const error = new Error("Không gửi được email xác thực. Vui lòng thử lại sau.");
+    const error = new Error("Không gửi được email. Vui lòng thử lại sau.");
     error.statusCode = 503;
     throw error;
   }
 };
 
-// Hàm gửi email chung (có thể dùng cho các mục đích khác)
-const sendEmail = async (to, subject, text) => {
-  // TODO: Tích hợp service gửi email thực tế (nodemailer, ...)
-  console.log(`[MAIL] To: ${to} | Subject: ${subject} | Text: ${text}`);
-  return true;
+const sendVerificationEmail = async (to, otpCode, expireMinutes) => {
+  const subject = "Xác thực tài khoản CarePlus của bạn";
+  const text = `Xin chào,\n\nCảm ơn bạn đã đăng ký tài khoản tại CarePlus.\nĐể hoàn tất quá trình đăng ký, vui lòng sử dụng mã xác thực (OTP) dưới đây:\n\nMã xác thực của bạn: ${otpCode}\nMã này sẽ hết hạn sau ${expireMinutes} phút.\n\nVui lòng không chia sẻ mã này với bất kỳ ai để đảm bảo an toàn cho tài khoản của bạn.\nNếu bạn không thực hiện yêu cầu này, bạn có thể bỏ qua email này.\n\nTrân trọng,\nĐội ngũ CarePlus\n\nEmail này được gửi tự động, vui lòng không trả lời lại.`;
+  return sendEmail(to, subject, text);
+};
+
+const sendForgotPasswordEmail = async (to, otpCode, expireMinutes) => {
+  const subject = "Khôi phục mật khẩu CarePlus của bạn";
+  const text = `Xin chào,\n\nBạn đã yêu cầu khôi phục mật khẩu tại CarePlus.\nĐể hoàn tất quá trình này, vui lòng sử dụng mã xác thực (OTP) dưới đây:\n\nMã xác thực của bạn: ${otpCode}\nMã này sẽ hết hạn sau ${expireMinutes} phút.\n\nVui lòng không chia sẻ mã này với bất kỳ ai để đảm bảo an toàn cho tài khoản của bạn.\nNếu bạn không thực hiện yêu cầu này, bạn có thể bỏ qua email này.\n\nTrân trọng,\nĐội ngũ CarePlus\n\nEmail này được gửi tự động, vui lòng không trả lời lại.`;
+  return sendEmail(to, subject, text);
 };
 
 module.exports = {
   sendEmail,
   sendVerificationEmail,
+  sendForgotPasswordEmail,
 };
