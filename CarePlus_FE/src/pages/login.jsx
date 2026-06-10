@@ -1,10 +1,15 @@
 import { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { Alert, message } from "antd";
-import { LoadingOutlined, LockOutlined, LoginOutlined, UserOutlined } from "@ant-design/icons";
+import { message } from "antd";
+import { LoadingOutlined, LockOutlined, MailOutlined, RightOutlined } from "@ant-design/icons";
 import { loginSuccess } from "../store/slices/authSlice";
 import { loginApi } from "../util/api";
+import AuthLayout from "../components/ui/AuthLayout";
+import AuthCard from "../components/ui/AuthCard";
+import FormField from "../components/ui/FormField";
+import PasswordField from "../components/ui/PasswordField";
+import SubmitButton from "../components/ui/SubmitButton";
 
 const initialForm = {
     login: "",
@@ -12,7 +17,7 @@ const initialForm = {
 };
 
 const getProfileRouteByRole = (role) => {
-    return role === "admin" ? "/admin/profile" : "/user/profile";
+    return role === "admin" ? "/admin/dashboard" : "/user/profile";
 };
 
 const LoginPage = () => {
@@ -100,94 +105,69 @@ const LoginPage = () => {
     return (
         <>
             {contextHolder}
-            <section className="auth-shell">
-                <div className="auth-panel auth-panel--hero">
-                    <span className="auth-kicker">CarePlus Authentication</span>
-                    <h1>Đăng nhập bằng JWT cho luồng client-server mới.</h1>
-                    <p>
-                        Phiên đăng nhập được xác thực ở backend, frontend lưu access token và điều hướng
-                        tự động theo quyền `user` hoặc `admin`.
-                    </p>
-                    <ul className="auth-points">
-                        <li>Validation ở cả client và server.</li>
-                        <li>Rate limiting tại endpoint đăng nhập.</li>
-                        <li>Authorization theo role và trả về URL profile phù hợp.</li>
-                    </ul>
-                </div>
-
-                <div className="auth-panel auth-panel--form">
-                    <div className="auth-card">
-                        <div className="auth-card__header">
-                            <h2>Đăng nhập</h2>
-                            <p>Dùng username hoặc email để tiếp tục.</p>
-                        </div>
-
-                        {serverError && (
-                            <Alert
-                                type="error"
-                                showIcon
-                                className="auth-alert"
-                                message={serverError}
-                            />
-                        )}
-
-                        <form className="auth-form" onSubmit={handleSubmit} noValidate>
-                            <div className="form-group">
-                                <label htmlFor="login" className="form-label">Username hoặc Email</label>
-                                <div className={`auth-input ${errors.login ? "auth-input--error" : ""}`}>
-                                    <UserOutlined />
-                                    <input
-                                        id="login"
-                                        name="login"
-                                        type="text"
-                                        autoComplete="username"
-                                        placeholder="nhap username hoac email"
-                                        value={form.login}
-                                        onChange={handleChange}
-                                    />
-                                </div>
-                                {errors.login && <p className="form-error">{errors.login}</p>}
-                                {!errors.login && form.login && (
-                                    <p className="form-hint">
-                                        {isEmailLogin ? "Đang đăng nhập bằng email." : "Đang đăng nhập bằng username."}
-                                    </p>
-                                )}
-                            </div>
-
-                            <div className="form-group">
-                                <label htmlFor="password" className="form-label">Mật khẩu</label>
-                                <div className={`auth-input ${errors.password ? "auth-input--error" : ""}`}>
-                                    <LockOutlined />
-                                    <input
-                                        id="password"
-                                        name="password"
-                                        type="password"
-                                        autoComplete="current-password"
-                                        placeholder="nhap mat khau"
-                                        value={form.password}
-                                        onChange={handleChange}
-                                    />
-                                </div>
-                                {errors.password && <p className="form-error">{errors.password}</p>}
-                            </div>
-
-                            <button
-                                type="submit"
-                                className="btn btn--primary auth-submit"
-                                disabled={submitting}
-                            >
-                                {submitting ? <LoadingOutlined /> : <LoginOutlined />}
-                                {submitting ? "Đang đăng nhập..." : "Đăng nhập"}
-                            </button>
-                        </form>
-
-                        <p className="auth-card__footer">
-                            <Link to="/forgot-password" style={{ display: 'block', marginBottom: '8px' }}>Quên mật khẩu?</Link>
-                            Chưa có tài khoản? <Link to="/">Quay về trang chủ</Link>
+            <AuthLayout
+                title="Đăng nhập"
+                description="Chào mừng bạn trở lại CarePlus Clinic"
+            >
+                <AuthCard
+                    footer={(
+                        <p>
+                            Chưa có tài khoản?{" "}
+                            <Link to="/register" className="font-medium text-[#0092b8] hover:text-[#007fa0]">
+                                Đăng ký ngay
+                            </Link>
                         </p>
-                    </div>
-                </div>
-            </section>
+                    )}
+                >
+                    {serverError ? (
+                        <div className="rounded-[13px] border border-rose-200 bg-rose-50 px-4 py-3 text-[12px] text-rose-700">
+                            {serverError}
+                        </div>
+                    ) : null}
+
+                    <form className={`space-y-[15px] ${serverError ? "mt-[15px]" : ""}`} onSubmit={handleSubmit} noValidate>
+                        <FormField
+                            id="login"
+                            name="login"
+                            label="Email"
+                            value={form.login}
+                            onChange={handleChange}
+                            placeholder="email@example.com"
+                            autoComplete="username"
+                            error={errors.login}
+                            hint={!errors.login && form.login ? (isEmailLogin ? "Đang đăng nhập bằng email." : "Hệ thống vẫn chấp nhận username ở trường này.") : ""}
+                            icon={<MailOutlined />}
+                        />
+
+                        <PasswordField
+                            id="password"
+                            name="password"
+                            label="Mật khẩu"
+                            value={form.password}
+                            onChange={handleChange}
+                            placeholder="Nhập mật khẩu"
+                            autoComplete="current-password"
+                            error={errors.password}
+                            icon={<LockOutlined />}
+                            labelAction={(
+                                <Link to="/forgot-password" className="text-[11px] font-normal text-[#0092b8] hover:text-[#007fa0]">
+                                    Quên mật khẩu?
+                                </Link>
+                            )}
+                        />
+
+                        <div className="pt-[15px]">
+                            <SubmitButton
+                                loading={submitting}
+                                disabled={submitting}
+                                icon={submitting ? <LoadingOutlined /> : <RightOutlined className="text-[13px]" />}
+                            >
+                                {submitting ? "Đang đăng nhập..." : "Đăng nhập"}
+                            </SubmitButton>
+                        </div>
+                    </form>
+                </AuthCard>
+            </AuthLayout>
         </>
     );
 };

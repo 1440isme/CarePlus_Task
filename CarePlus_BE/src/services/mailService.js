@@ -1,50 +1,112 @@
-// src/services/mailService.js
-
 require("dotenv").config();
 const nodemailer = require("nodemailer");
 
-// Cấu hình transporter dùng biến môi trường để bảo mật thông tin
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: Number(process.env.SMTP_PORT),
-  secure: process.env.SMTP_SECURE === "true", // true cho 465, false cho 587
-  pool: true,
-  maxConnections: 1,
-  maxMessages: 20,
-  connectionTimeout: 10000,
-  greetingTimeout: 10000,
-  socketTimeout: 20000,
-  auth: {
+const normalizePassword = (value) => {
+  if (!value) {
+    return "";
+  }
+
+  // Gmail app passwords are often copied with spaces every 4 characters.
+  return String(value).replace(/\s+/g, "");
+};
+
+const buildTransportConfig = ({
+  host,
+  port,
+  secure,
+  user,
+  pass,
+  from,
+  label,
+}) => {
+  if (!host || !port || !user || !pass) {
+    return null;
+  }
+
+  return {
+    label,
+    from: from || user,
+    transporter: nodemailer.createTransport({
+      host,
+      port: Number(port),
+      secure: String(secure) === "true",
+      pool: true,
+      maxConnections: 1,
+      maxMessages: 20,
+      connectionTimeout: 10000,
+      greetingTimeout: 10000,
+      socketTimeout: 20000,
+      auth: {
+        user,
+        pass: normalizePassword(pass),
+      },
+    }),
+  };
+};
+
+const transportCandidates = [
+  buildTransportConfig({
+    host: process.env.SMTP_HOST,
+    port: process.env.SMTP_PORT,
+    secure: process.env.SMTP_SECURE,
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS,
-  },
-});
+    from: process.env.SMTP_FROM,
+    label: "primary",
+  }),
+  buildTransportConfig({
+    host: process.env.SMTP_HOST,
+    port: process.env.SMTP_PORT_2 || process.env.SMTP_PORT,
+    secure: process.env.SMTP_SECURE_2 ?? "false",
+    user: process.env.SMTP_USER_2,
+    pass: process.env.SMTP_PASS_2,
+    from: process.env.SMTP_FROM_2 || process.env.SMTP_USER_2,
+    label: "secondary",
+  }),
+].filter(Boolean);
 
-// Hàm gửi email chung dùng chung cho các chức năng khác
+if (!transportCandidates.length) {
+  console.warn("[MAIL] Không tìm thấy cấu hình SMTP hợp lệ trong biến môi trường.");
+}
+
+const sendWithTransport = async (transportConfig, mailOptions) => {
+  await transportConfig.transporter.sendMail({
+    ...mailOptions,
+    from: transportConfig.from,
+  });
+  console.log(`[MAIL] Đã gửi email qua ${transportConfig.label} tới: ${mailOptions.to}`);
+};
+
 const sendEmail = async (to, subject, text) => {
   const mailOptions = {
-    from: process.env.SMTP_FROM || process.env.SMTP_USER,
     to,
     subject,
     text,
   };
-  try {
-    await transporter.sendMail(mailOptions);
-    console.log(`[MAIL] Đã gửi email tới: ${to}`);
-    return true;
-  } catch (err) {
-    console.error("Lỗi gửi email:", {
-      message: err.message,
-      code: err.code,
-      command: err.command,
-      response: err.response,
-      responseCode: err.responseCode,
-      to,
-    });
-    const error = new Error("Không gửi được email. Vui lòng thử lại sau.");
-    error.statusCode = 503;
-    throw error;
+
+  let lastError = null;
+
+  for (const transportConfig of transportCandidates) {
+    try {
+      await sendWithTransport(transportConfig, mailOptions);
+      return true;
+    } catch (err) {
+      lastError = err;
+      console.error(`[MAIL] Gửi email thất bại qua ${transportConfig.label}:`, {
+        message: err.message,
+        code: err.code,
+        command: err.command,
+        response: err.response,
+        responseCode: err.responseCode,
+        to,
+      });
+    }
   }
+
+  const error = new Error("Không gửi được email. Vui lòng thử lại sau.");
+  error.statusCode = 503;
+  error.cause = lastError;
+  throw error;
 };
 
 const sendVerificationEmail = async (to, otpCode, expireMinutes) => {

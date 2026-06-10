@@ -70,6 +70,40 @@ export const getCurrentSession = () => {
     return axios.get("/auth/me");
 };
 
+export const getPublicHomeData = () => {
+    return axios.get("/api/public/home");
+};
+
+export const getSpecialties = (params) => {
+    return axios.get("/api/public/specialties", { params });
+};
+
+export const getSpecialtyDetail = (slugOrId) => {
+    return axios.get(`/api/public/specialties/${slugOrId}`);
+};
+
+export const getDoctors = (params) => {
+    return axios.get("/api/public/doctors", { params });
+};
+
+export const getDoctorDetail = (slugOrId) => {
+    return axios.get(`/api/public/doctors/${slugOrId}`);
+};
+
+export const getDoctorAvailableSlots = (slugOrId, date) => {
+    return axios.get(`/api/public/doctors/${slugOrId}/available-slots`, {
+        params: { date },
+    });
+};
+
+export const getArticles = (params) => {
+    return axios.get("/api/public/articles", { params });
+};
+
+export const getArticleDetail = (slugOrId) => {
+    return axios.get(`/api/public/articles/${slugOrId}`);
+};
+
 export const getAllUsers = () => {
     return axios.get("/api/users");
 };
@@ -88,4 +122,40 @@ export const updateUserApi = (userId, data) => {
 
 export const deleteUserApi = (userId) => {
     return axios.delete(`/api/users/${userId}`);
+};
+
+export const getAdminDashboard = () => {
+    return axios.get("/api/admin/dashboard");
+};
+
+export const getAdminSpecialties = (params) => {
+    return axios.get("/api/admin/specialties", { params });
+};
+
+export const createAdminSpecialty = (data) => {
+    return axios.post("/api/admin/specialties", data);
+};
+
+export const updateAdminSpecialty = (specialtyId, data) => {
+    return axios.put(`/api/admin/specialties/${specialtyId}`, data);
+};
+
+export const deleteAdminSpecialty = (specialtyId) => {
+    return axios.delete(`/api/admin/specialties/${specialtyId}`);
+};
+
+export const getAdminDoctors = (params) => {
+    return axios.get("/api/admin/doctors", { params });
+};
+
+export const createAdminDoctor = (data) => {
+    return axios.post("/api/admin/doctors", data);
+};
+
+export const updateAdminDoctor = (doctorId, data) => {
+    return axios.put(`/api/admin/doctors/${doctorId}`, data);
+};
+
+export const deleteAdminDoctor = (doctorId) => {
+    return axios.delete(`/api/admin/doctors/${doctorId}`);
 };

@@ -1,9 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Alert, message } from "antd";
+import { message } from "antd";
 import {
-    EyeInvisibleOutlined,
-    EyeOutlined,
     LoadingOutlined,
     LockOutlined,
     MailOutlined,
@@ -13,6 +11,11 @@ import {
     UserOutlined,
 } from "@ant-design/icons";
 import { registerApi, sendVerificationCodeApi } from "../util/api";
+import AuthLayout from "../components/ui/AuthLayout";
+import AuthCard from "../components/ui/AuthCard";
+import FormField from "../components/ui/FormField";
+import PasswordField from "../components/ui/PasswordField";
+import SubmitButton from "../components/ui/SubmitButton";
 
 const MIN_PASSWORD_LENGTH = 6;
 const VERIFICATION_CODE_LENGTH = 5;
@@ -38,8 +41,6 @@ const RegisterPage = () => {
     const [submitting, setSubmitting] = useState(false);
     const [cooldown, setCooldown] = useState(0);
     const [verificationRequested, setVerificationRequested] = useState(false);
-    const [showPassword, setShowPassword] = useState(false);
-    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
     useEffect(() => {
         if (!cooldown) {
@@ -63,7 +64,7 @@ const RegisterPage = () => {
     const canResendCode = cooldown === 0 && !sendingCode;
     const verificationHint = useMemo(() => {
         if (!verificationRequested) {
-            return "Nhập thông tin rồi bấm Nhận mã để khóa dữ liệu và gửi OTP về email.";
+            return "Nhập thông tin rồi bấm Gửi mã để nhận OTP xác thực email.";
         }
         if (cooldown > 0) {
             return `Bạn có thể gửi lại mã sau ${cooldown}s.`;
@@ -80,7 +81,7 @@ const RegisterPage = () => {
         const verificationCode = form.verificationCode.trim();
 
         if (!username) {
-            nextErrors.username = "Vui lòng nhập username.";
+            nextErrors.username = "Vui lòng nhập tên đăng nhập.";
         }
 
         if (!email) {
@@ -213,171 +214,123 @@ const RegisterPage = () => {
     return (
         <>
             {contextHolder}
-            <section className="auth-shell">
-                <div className="auth-panel auth-panel--hero auth-panel--hero-register">
-                    <span className="auth-kicker">CarePlus Registration</span>
-                    <h1>Tạo tài khoản mới theo luồng React client-server.</h1>
-                    <p>
-                        Frontend gửi OTP bằng axios, giữ state cục bộ bằng hooks, và hoàn tất đăng ký
-                        qua API thay cho form EJS server-rendered trước đây.
-                    </p>
-                    <ul className="auth-points">
-                        <li>Khóa thông tin sau khi yêu cầu OTP để tránh lệch dữ liệu.</li>
-                        <li>Hỗ trợ gửi lại mã sau thời gian chờ 60 giây.</li>
-                        <li>Giữ validation đồng bộ với backend hiện tại.</li>
-                    </ul>
-                </div>
-
-                <div className="auth-panel auth-panel--form">
-                    <div className="auth-card">
-                        <div className="auth-card__header">
-                            <h2>Đăng ký</h2>
-                            <p>Tạo tài khoản CarePlus bằng email xác thực.</p>
-                        </div>
-
-                        {serverError && (
-                            <Alert type="error" showIcon className="auth-alert" message={serverError} />
-                        )}
-
-                        {!serverError && serverSuccess && (
-                            <Alert type="success" showIcon className="auth-alert" message={serverSuccess} />
-                        )}
-
-                        <form className="auth-form" onSubmit={handleSubmit} noValidate>
-                            <div className="form-group">
-                                <label htmlFor="username" className="form-label">Username</label>
-                                <div className={`auth-input ${errors.username ? "auth-input--error" : ""}`}>
-                                    <UserOutlined />
-                                    <input
-                                        id="username"
-                                        name="username"
-                                        type="text"
-                                        autoComplete="username"
-                                        placeholder="Nhập tên người dùng"
-                                        value={form.username}
-                                        onChange={handleChange}
-                                        readOnly={lockedRegistrationFields}
-                                    />
-                                </div>
-                                {errors.username && <p className="form-error">{errors.username}</p>}
-                            </div>
-
-                            <div className="form-group">
-                                <label htmlFor="email" className="form-label">Email</label>
-                                <div className={`auth-input ${errors.email ? "auth-input--error" : ""}`}>
-                                    <MailOutlined />
-                                    <input
-                                        id="email"
-                                        name="email"
-                                        type="email"
-                                        autoComplete="email"
-                                        placeholder="Nhập Email"
-                                        value={form.email}
-                                        onChange={handleChange}
-                                        readOnly={lockedRegistrationFields}
-                                    />
-                                </div>
-                                {errors.email && <p className="form-error">{errors.email}</p>}
-                            </div>
-
-                            <div className="auth-form__row">
-                                <div className="form-group">
-                                    <label htmlFor="password" className="form-label">Mật khẩu</label>
-                                    <div className={`auth-input ${errors.password ? "auth-input--error" : ""}`}>
-                                        <LockOutlined />
-                                        <input
-                                            id="password"
-                                            name="password"
-                                            type={showPassword ? "text" : "password"}
-                                            autoComplete="new-password"
-                                            placeholder="Nhập mật khẩu"
-                                            value={form.password}
-                                            onChange={handleChange}
-                                            readOnly={lockedRegistrationFields}
-                                        />
-                                        <button
-                                            type="button"
-                                            className="auth-input__toggle"
-                                            onClick={() => setShowPassword((prev) => !prev)}
-                                            aria-label={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
-                                        >
-                                            {showPassword ? <EyeInvisibleOutlined /> : <EyeOutlined />}
-                                        </button>
-                                    </div>
-                                    {errors.password && <p className="form-error">{errors.password}</p>}
-                                </div>
-
-                                <div className="form-group">
-                                    <label htmlFor="confirmPassword" className="form-label">Xác nhận mật khẩu</label>
-                                    <div className={`auth-input ${errors.confirmPassword ? "auth-input--error" : ""}`}>
-                                        <LockOutlined />
-                                        <input
-                                            id="confirmPassword"
-                                            name="confirmPassword"
-                                            type={showConfirmPassword ? "text" : "password"}
-                                            autoComplete="new-password"
-                                            placeholder="Nhập lại mật khẩu"
-                                            value={form.confirmPassword}
-                                            onChange={handleChange}
-                                            readOnly={lockedRegistrationFields}
-                                        />
-                                        <button
-                                            type="button"
-                                            className="auth-input__toggle"
-                                            onClick={() => setShowConfirmPassword((prev) => !prev)}
-                                            aria-label={showConfirmPassword ? "Ẩn xác nhận mật khẩu" : "Hiện xác nhận mật khẩu"}
-                                        >
-                                            {showConfirmPassword ? <EyeInvisibleOutlined /> : <EyeOutlined />}
-                                        </button>
-                                    </div>
-                                    {errors.confirmPassword && <p className="form-error">{errors.confirmPassword}</p>}
-                                </div>
-                            </div>
-
-                            <div className="form-group">
-                                <label htmlFor="verificationCode" className="form-label">Mã xác thực</label>
-                                <div className={`auth-input auth-input--action ${errors.verificationCode ? "auth-input--error" : ""}`}>
-                                    <SafetyCertificateOutlined />
-                                    <input
-                                        id="verificationCode"
-                                        name="verificationCode"
-                                        type="text"
-                                        inputMode="numeric"
-                                        maxLength={VERIFICATION_CODE_LENGTH}
-                                        placeholder="Nhập mã OTP"
-                                        value={form.verificationCode}
-                                        onChange={handleChange}
-                                    />
-                                    <button
-                                        type="button"
-                                        className="btn btn--outline btn--sm auth-inline-action"
-                                        onClick={handleSendCode}
-                                        disabled={!canResendCode}
-                                    >
-                                        {sendingCode ? <LoadingOutlined /> : <SendOutlined />}
-                                        {sendingCode ? "Đang gửi..." : cooldown > 0 ? `Gửi lại (${cooldown}s)` : "Nhận mã"}
-                                    </button>
-                                </div>
-                                {errors.verificationCode && <p className="form-error">{errors.verificationCode}</p>}
-                                {!errors.verificationCode && <p className="form-hint">{verificationHint}</p>}
-                            </div>
-
-                            <button
-                                type="submit"
-                                className="btn btn--primary auth-submit"
-                                disabled={submitting || sendingCode}
-                            >
-                                {submitting ? <LoadingOutlined /> : <UserAddOutlined />}
-                                {submitting ? "Đang đăng ký..." : "Tạo tài khoản"}
-                            </button>
-                        </form>
-
-                        <p className="auth-card__footer">
-                            Đã có tài khoản? <Link to="/login">Đăng nhập ngay</Link>
+            <AuthLayout
+                title="Tạo tài khoản"
+                description="Đăng ký để đặt lịch khám tại CarePlus"
+            >
+                <AuthCard
+                    footer={(
+                        <p>
+                            Đã có tài khoản?{" "}
+                            <Link to="/login" className="font-medium text-[#0092b8] hover:text-[#007fa0]">
+                                Đăng nhập
+                            </Link>
                         </p>
-                    </div>
-                </div>
-            </section>
+                    )}
+                >
+                    {serverError ? (
+                        <div className="mb-[15px] rounded-[13px] border border-rose-200 bg-rose-50 px-4 py-3 text-[12px] text-rose-700">
+                            {serverError}
+                        </div>
+                    ) : null}
+
+                    {!serverError && serverSuccess ? (
+                        <div className="mb-[15px] rounded-[13px] border border-emerald-200 bg-emerald-50 px-4 py-3 text-[12px] text-emerald-700">
+                            {serverSuccess}
+                        </div>
+                    ) : null}
+
+                    <form className="space-y-[15px]" onSubmit={handleSubmit} noValidate>
+                        <FormField
+                            id="username"
+                            name="username"
+                            label="Tên đăng nhập"
+                            value={form.username}
+                            onChange={handleChange}
+                            placeholder="nhapusername"
+                            autoComplete="username"
+                            error={errors.username}
+                            icon={<UserOutlined />}
+                            readOnly={lockedRegistrationFields}
+                        />
+
+                        <FormField
+                            id="email"
+                            name="email"
+                            label="Email"
+                            type="email"
+                            value={form.email}
+                            onChange={handleChange}
+                            placeholder="email@example.com"
+                            autoComplete="email"
+                            error={errors.email}
+                            icon={<MailOutlined />}
+                            readOnly={lockedRegistrationFields}
+                        />
+
+                        <PasswordField
+                            id="password"
+                            name="password"
+                            label="Mật khẩu"
+                            value={form.password}
+                            onChange={handleChange}
+                            placeholder="Tối thiểu 6 ký tự"
+                            autoComplete="new-password"
+                            error={errors.password}
+                            icon={<LockOutlined />}
+                            readOnly={lockedRegistrationFields}
+                        />
+
+                        <PasswordField
+                            id="confirmPassword"
+                            name="confirmPassword"
+                            label="Xác nhận mật khẩu"
+                            value={form.confirmPassword}
+                            onChange={handleChange}
+                            placeholder="Nhập lại mật khẩu"
+                            autoComplete="new-password"
+                            error={errors.confirmPassword}
+                            icon={<LockOutlined />}
+                            readOnly={lockedRegistrationFields}
+                        />
+
+                        <FormField
+                            id="verificationCode"
+                            name="verificationCode"
+                            label="Mã xác thực"
+                            value={form.verificationCode}
+                            onChange={handleChange}
+                            placeholder="Nhập mã OTP"
+                            inputMode="numeric"
+                            maxLength={VERIFICATION_CODE_LENGTH}
+                            error={errors.verificationCode}
+                            hint={verificationHint}
+                            icon={<SafetyCertificateOutlined />}
+                            action={(
+                                <button
+                                    type="button"
+                                    onClick={handleSendCode}
+                                    disabled={!canResendCode}
+                                    className="inline-flex shrink-0 items-center gap-1 rounded-[9px] border border-[#dbe4ea] px-3 py-1.5 text-[11px] font-medium text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:text-slate-400"
+                                >
+                                    {sendingCode ? <LoadingOutlined /> : <SendOutlined />}
+                                    {sendingCode ? "Đang gửi" : cooldown > 0 ? `Gửi lại ${cooldown}s` : "Gửi mã"}
+                                </button>
+                            )}
+                        />
+
+                        <div className="pt-[15px]">
+                            <SubmitButton
+                                loading={submitting}
+                                disabled={submitting || sendingCode}
+                                icon={submitting ? <LoadingOutlined /> : <UserAddOutlined className="text-[13px]" />}
+                            >
+                                {submitting ? "Đang đăng ký..." : "Tạo tài khoản"}
+                            </SubmitButton>
+                        </div>
+                    </form>
+                </AuthCard>
+            </AuthLayout>
         </>
     );
 };
