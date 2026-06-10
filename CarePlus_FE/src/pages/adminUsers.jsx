@@ -127,8 +127,33 @@ const AdminUsersPage = () => {
             return;
         }
 
-        loadUsers();
-    }, [isAuthenticated, currentUser]);
+        let isMounted = true;
+
+        const bootstrapUsers = async () => {
+            try {
+                const res = await getAllUsers();
+                if (!isMounted) {
+                    return;
+                }
+
+                setUsers(res.data?.users || []);
+            } catch (error) {
+                if (isMounted) {
+                    messageApi.error(error.response?.data?.message || "Không thể tải danh sách người dùng.");
+                }
+            } finally {
+                if (isMounted) {
+                    setLoading(false);
+                }
+            }
+        };
+
+        void bootstrapUsers();
+
+        return () => {
+            isMounted = false;
+        };
+    }, [isAuthenticated, currentUser, messageApi]);
 
     const filteredUsers = useMemo(() => {
         const keyword = query.trim().toLowerCase();

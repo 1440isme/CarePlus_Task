@@ -1,9 +1,9 @@
 import express from "express";
 import cors from "cors";
 import bodyParser from "body-parser";
-import viewEngine from "./config/viewEngine";
-import initWebRoutes from "./routes/web";
 import connectDB from "./config/configdb";
+import authRoutes from "./routes/auth";
+import apiRoutes from "./routes/api";
 require("dotenv").config();
 
 let app = express();
@@ -16,8 +16,8 @@ app.use(cors({
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-viewEngine(app);
-initWebRoutes(app);
+app.use("/", authRoutes);
+app.use("/", apiRoutes);
 
 // Global Error Handlers to catch crashes
 process.on('unhandledRejection', (reason, promise) => {
