@@ -11,7 +11,7 @@ const getDashboard = async (req, res) => {
     try {
         return res.status(200).json({
             success: true,
-            data: publicCatalogService.getAdminDashboardData(),
+            data: await publicCatalogService.getAdminDashboardData(),
         });
     } catch (error) {
         return handleError(res, error, "Không thể tải dữ liệu tổng quan quản trị");
@@ -22,7 +22,7 @@ const getSpecialties = async (req, res) => {
     try {
         return res.status(200).json({
             success: true,
-            ...publicCatalogService.listAdminSpecialties(req.query),
+            ...(await publicCatalogService.listAdminSpecialties(req.query)),
         });
     } catch (error) {
         return handleError(res, error, "Không thể tải danh sách chuyên khoa quản trị");
@@ -33,7 +33,7 @@ const createSpecialty = async (req, res) => {
     try {
         return res.status(201).json({
             success: true,
-            item: publicCatalogService.createSpecialty(req.body),
+            item: await publicCatalogService.createSpecialty(req.body),
             message: "Tạo chuyên khoa thành công",
         });
     } catch (error) {
@@ -43,7 +43,7 @@ const createSpecialty = async (req, res) => {
 
 const updateSpecialty = async (req, res) => {
     try {
-        const item = publicCatalogService.updateSpecialty(req.params.id, req.body);
+        const item = await publicCatalogService.updateSpecialty(req.params.id, req.body);
         if (!item) {
             return res.status(404).json({
                 success: false,
@@ -63,7 +63,7 @@ const updateSpecialty = async (req, res) => {
 
 const deleteSpecialty = async (req, res) => {
     try {
-        const deleted = publicCatalogService.deleteSpecialty(req.params.id);
+        const deleted = await publicCatalogService.deleteSpecialty(req.params.id);
         if (!deleted) {
             return res.status(404).json({
                 success: false,
@@ -84,7 +84,7 @@ const getDoctors = async (req, res) => {
     try {
         return res.status(200).json({
             success: true,
-            ...publicCatalogService.listAdminDoctors(req.query),
+            ...(await publicCatalogService.listAdminDoctors(req.query)),
         });
     } catch (error) {
         return handleError(res, error, "Không thể tải danh sách bác sĩ quản trị");
@@ -95,7 +95,7 @@ const createDoctor = async (req, res) => {
     try {
         return res.status(201).json({
             success: true,
-            item: publicCatalogService.createDoctor(req.body),
+            item: await publicCatalogService.createDoctor(req.body),
             message: "Tạo bác sĩ thành công",
         });
     } catch (error) {
@@ -105,7 +105,7 @@ const createDoctor = async (req, res) => {
 
 const updateDoctor = async (req, res) => {
     try {
-        const item = publicCatalogService.updateDoctor(req.params.id, req.body);
+        const item = await publicCatalogService.updateDoctor(req.params.id, req.body);
         if (!item) {
             return res.status(404).json({
                 success: false,
@@ -125,7 +125,7 @@ const updateDoctor = async (req, res) => {
 
 const deleteDoctor = async (req, res) => {
     try {
-        const deleted = publicCatalogService.deleteDoctor(req.params.id);
+        const deleted = await publicCatalogService.deleteDoctor(req.params.id);
         if (!deleted) {
             return res.status(404).json({
                 success: false,
