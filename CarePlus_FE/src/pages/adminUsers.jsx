@@ -13,6 +13,7 @@ import {
     UsergroupAddOutlined,
 } from "@ant-design/icons";
 import { message } from "antd";
+import AdminLayout from "../components/admin/AdminLayout";
 import {
     createUserApi,
     deleteUserApi,
@@ -326,26 +327,29 @@ const AdminUsersPage = () => {
     return (
         <>
             {contextHolder}
-            <section className="admin-users-page">
-                <div className="admin-users-hero">
-                    <div>
-                        <span className="admin-users-hero__eyebrow">Admin Console</span>
-                        <h1>Quản lý tất cả tài khoản người dùng</h1>
-                        <p>
-                            Xem danh sách, tạo mới, cập nhật và xóa tài khoản bằng API admin được bảo vệ
-                            bởi JWT và phân quyền theo role.
-                        </p>
-                    </div>
-                    <div className="admin-users-hero__actions">
-                        <button className="btn btn--outline" type="button" onClick={() => loadUsers()}>
+            <AdminLayout
+                title="Quản lý người dùng"
+                description="Xem danh sách, tạo mới, cập nhật và xóa tài khoản người dùng bằng API admin được bảo vệ bởi JWT và phân quyền theo role."
+                activeKey="users"
+                actions={
+                    <>
+                        <button
+                            className="inline-flex items-center gap-2 rounded-full border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:bg-white"
+                            onClick={() => loadUsers()}
+                            type="button"
+                        >
                             <ReloadOutlined /> Tải lại
                         </button>
-                        <button className="btn btn--primary" type="button" onClick={resetForm}>
+                        <button
+                            className="inline-flex items-center gap-2 rounded-full bg-cyan-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-cyan-700"
+                            onClick={resetForm}
+                            type="button"
+                        >
                             <PlusOutlined /> Tạo user mới
                         </button>
-                    </div>
-                </div>
-
+                    </>
+                }
+            >
                 <div className="admin-users-layout">
                     <section className="admin-users-panel admin-users-panel--table">
                         <div className="admin-users-panel__header">
@@ -628,7 +632,7 @@ const AdminUsersPage = () => {
                         </form>
                     </aside>
                 </div>
-            </section>
+            </AdminLayout>
         </>
     );
 };

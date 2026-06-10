@@ -4,7 +4,7 @@ const getHomeData = async (req, res) => {
     try {
         return res.status(200).json({
             success: true,
-            data: publicCatalogService.getHomeData(),
+            data: await publicCatalogService.getHomeData(),
         });
     } catch (error) {
         return res.status(500).json({
@@ -18,7 +18,7 @@ const getSpecialties = async (req, res) => {
     try {
         return res.status(200).json({
             success: true,
-            ...publicCatalogService.listSpecialties(req.query),
+            ...(await publicCatalogService.listSpecialties(req.query)),
         });
     } catch (error) {
         return res.status(500).json({
@@ -30,7 +30,7 @@ const getSpecialties = async (req, res) => {
 
 const getSpecialtyDetail = async (req, res) => {
     try {
-        const item = publicCatalogService.getSpecialtyDetail(req.params.slugOrId);
+        const item = await publicCatalogService.getSpecialtyDetail(req.params.slugOrId);
         if (!item) {
             return res.status(404).json({
                 success: false,
@@ -54,7 +54,7 @@ const getDoctors = async (req, res) => {
     try {
         return res.status(200).json({
             success: true,
-            ...publicCatalogService.listDoctors(req.query),
+            ...(await publicCatalogService.listDoctors(req.query)),
         });
     } catch (error) {
         return res.status(500).json({
@@ -66,7 +66,7 @@ const getDoctors = async (req, res) => {
 
 const getDoctorDetail = async (req, res) => {
     try {
-        const item = publicCatalogService.getDoctorDetail(req.params.slugOrId);
+        const item = await publicCatalogService.getDoctorDetail(req.params.slugOrId);
         if (!item) {
             return res.status(404).json({
                 success: false,
@@ -96,7 +96,7 @@ const getDoctorAvailableSlots = async (req, res) => {
             });
         }
 
-        const slots = publicCatalogService.getAvailableSlots(req.params.slugOrId, date);
+        const slots = await publicCatalogService.getAvailableSlots(req.params.slugOrId, date);
         if (slots === null) {
             return res.status(404).json({
                 success: false,
