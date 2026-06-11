@@ -1,3 +1,5 @@
+import db from "../models/index";
+
 const CLINIC_INFO = {
     name: "CarePlus Clinic",
     phone: "1900 1234",
@@ -9,273 +11,6 @@ const CLINIC_INFO = {
         "Chủ nhật: Nghỉ",
     ],
 };
-
-let specialties = [
-    {
-        id: 1,
-        slug: "co-xuong-khop",
-        name: "Cơ Xương Khớp",
-        summary: "Chẩn đoán và điều trị các bệnh lý xương khớp, cột sống và vận động.",
-        description: "Chuyên khoa hỗ trợ khám đau lưng, thoái hóa khớp, chấn thương thể thao và phục hồi chức năng vận động.",
-        icon: "🦴",
-        color: "from-rose-50 to-orange-50",
-        doctorCount: 3,
-        popularityRank: 1,
-        isActive: true,
-        coverImage: "https://images.unsplash.com/photo-1516549655169-df83a0774514?auto=format&fit=crop&w=1200&q=80",
-    },
-    {
-        id: 2,
-        slug: "tim-mach",
-        name: "Tim mạch",
-        summary: "Khám và theo dõi các bệnh tim mạch, huyết áp, mỡ máu.",
-        description: "Tập trung kiểm tra sức khỏe tim mạch, nguy cơ đột quỵ, rối loạn nhịp tim và tư vấn dự phòng lâu dài.",
-        icon: "❤️",
-        color: "from-sky-50 to-cyan-50",
-        doctorCount: 2,
-        popularityRank: 2,
-        isActive: true,
-        coverImage: "https://images.unsplash.com/photo-1628348070889-cb656235b4eb?auto=format&fit=crop&w=1200&q=80",
-    },
-    {
-        id: 3,
-        slug: "tai-mui-hong",
-        name: "Tai Mũi Họng",
-        summary: "Khám viêm xoang, viêm họng, ù tai, các bệnh lý đường hô hấp trên.",
-        description: "Hỗ trợ điều trị viêm amidan, viêm xoang, rối loạn thính lực và các vấn đề tai mũi họng thường gặp.",
-        icon: "👂",
-        color: "from-emerald-50 to-teal-50",
-        doctorCount: 2,
-        popularityRank: 3,
-        isActive: true,
-        coverImage: "https://images.unsplash.com/photo-1582719471384-894fbb16e074?auto=format&fit=crop&w=1200&q=80",
-    },
-    {
-        id: 4,
-        slug: "nhi-khoa",
-        name: "Nhi khoa",
-        summary: "Theo dõi sức khỏe, dinh dưỡng và điều trị các bệnh lý thường gặp ở trẻ.",
-        description: "Đánh giá tăng trưởng, dinh dưỡng, sức đề kháng và điều trị các bệnh lý hô hấp, tiêu hóa ở trẻ em.",
-        icon: "🧒",
-        color: "from-violet-50 to-fuchsia-50",
-        doctorCount: 2,
-        popularityRank: 4,
-        isActive: true,
-        coverImage: "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=1200&q=80",
-    },
-    {
-        id: 5,
-        slug: "da-lieu",
-        name: "Da liễu",
-        summary: "Điều trị mụn, viêm da, nám da, rụng tóc và chăm sóc da chuyên sâu.",
-        description: "Khám và điều trị các vấn đề da liễu thường gặp, tư vấn phác đồ chăm sóc da phù hợp từng tình trạng.",
-        icon: "✨",
-        color: "from-amber-50 to-yellow-50",
-        doctorCount: 2,
-        popularityRank: 5,
-        isActive: true,
-        coverImage: "https://images.unsplash.com/photo-1556228578-8c89e6adf883?auto=format&fit=crop&w=1200&q=80",
-    },
-    {
-        id: 6,
-        slug: "tieu-hoa",
-        name: "Tiêu hóa",
-        summary: "Khám đau dạ dày, đại tràng, trào ngược và các bệnh lý đường tiêu hóa.",
-        description: "Tư vấn, nội soi, theo dõi bệnh lý dạ dày, đại tràng, gan mật và điều chỉnh chế độ ăn hỗ trợ điều trị.",
-        icon: "🌿",
-        color: "from-lime-50 to-emerald-50",
-        doctorCount: 2,
-        popularityRank: 6,
-        isActive: true,
-        coverImage: "https://images.unsplash.com/photo-1494390248081-4e521a5940db?auto=format&fit=crop&w=1200&q=80",
-    },
-    {
-        id: 7,
-        slug: "san-phu-khoa",
-        name: "Sản Phụ khoa",
-        summary: "Theo dõi sức khỏe phụ khoa, thai sản và tư vấn chăm sóc toàn diện.",
-        description: "Khám phụ khoa định kỳ, tư vấn sức khỏe sinh sản, thai kỳ và kế hoạch chăm sóc trước sau sinh.",
-        icon: "💗",
-        color: "from-pink-50 to-rose-50",
-        doctorCount: 2,
-        popularityRank: 7,
-        isActive: true,
-        coverImage: "https://images.unsplash.com/photo-1516549655669-df83a0774514?auto=format&fit=crop&w=1200&q=80",
-    },
-    {
-        id: 8,
-        slug: "noi-tong-quat",
-        name: "Nội tổng quát",
-        summary: "Khám tổng quát, tầm soát bệnh lý mạn tính và chăm sóc sức khỏe định kỳ.",
-        description: "Đánh giá toàn diện tình trạng sức khỏe, tầm soát sớm bệnh lý và lập kế hoạch theo dõi cá nhân hóa.",
-        icon: "🩺",
-        color: "from-slate-50 to-blue-50",
-        doctorCount: 4,
-        popularityRank: 8,
-        isActive: true,
-        coverImage: "https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&w=1200&q=80",
-    },
-];
-
-let doctors = [
-    {
-        id: 101,
-        slug: "dr-nguyen-thanh-hung",
-        specialtyId: 2,
-        fullName: "TS.BS Nguyễn Thanh Hùng",
-        title: "Bác sĩ Tim mạch",
-        gender: "MALE",
-        experienceYears: 14,
-        consultationFee: 420000,
-        bookedCount: 328,
-        availableSlotsToday: 5,
-        rating: 4.9,
-        bio: "Chuyên sâu điều trị tăng huyết áp, suy tim và dự phòng biến chứng tim mạch.",
-        hospital: "CarePlus Clinic",
-        image: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&w=900&q=80",
-        gallery: [
-            "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&w=1200&q=80",
-            "https://images.unsplash.com/photo-1584515933487-779824d29309?auto=format&fit=crop&w=1200&q=80",
-            "https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&w=1200&q=80",
-        ],
-        highlights: ["14 năm kinh nghiệm", "Tư vấn phòng ngừa đột quỵ", "Theo dõi bệnh lý mạn tính"],
-        availabilityDays: [1, 2, 3, 4, 5],
-        shifts: ["MORNING", "AFTERNOON"],
-        isFeatured: true,
-        isTopBooked: true,
-        isActive: true,
-    },
-    {
-        id: 102,
-        slug: "dr-tran-thi-ngoc-lan",
-        specialtyId: 1,
-        fullName: "BS Trần Thị Ngọc Lan",
-        title: "Bác sĩ Cơ Xương Khớp",
-        gender: "FEMALE",
-        experienceYears: 11,
-        consultationFee: 380000,
-        bookedCount: 287,
-        availableSlotsToday: 4,
-        rating: 4.8,
-        bio: "Điều trị đau vai gáy, thoái hóa cột sống và các bệnh lý khớp mạn tính.",
-        hospital: "CarePlus Clinic",
-        image: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=900&q=80",
-        gallery: [
-            "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=1200&q=80",
-            "https://images.unsplash.com/photo-1537368910025-700350fe46c7?auto=format&fit=crop&w=1200&q=80",
-        ],
-        highlights: ["Phác đồ phục hồi vận động", "Theo dõi đau lưng mạn tính", "Tư vấn chấn thương thể thao"],
-        availabilityDays: [1, 3, 5, 6],
-        shifts: ["MORNING"],
-        isFeatured: true,
-        isTopBooked: true,
-        isActive: true,
-    },
-    {
-        id: 103,
-        slug: "dr-le-minh-quan",
-        specialtyId: 3,
-        fullName: "BS Lê Minh Quân",
-        title: "Bác sĩ Tai Mũi Họng",
-        gender: "MALE",
-        experienceYears: 9,
-        consultationFee: 320000,
-        bookedCount: 190,
-        availableSlotsToday: 6,
-        rating: 4.7,
-        bio: "Điều trị viêm xoang, viêm họng kéo dài và rối loạn giọng nói.",
-        hospital: "CarePlus Clinic",
-        image: "https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&w=900&q=80",
-        gallery: [
-            "https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&w=1200&q=80",
-            "https://images.unsplash.com/photo-1511174511562-5f97f4f4a54a?auto=format&fit=crop&w=1200&q=80",
-        ],
-        highlights: ["Nội soi tai mũi họng", "Tư vấn viêm xoang mạn", "Điều trị ù tai"],
-        availabilityDays: [2, 4, 6],
-        shifts: ["AFTERNOON"],
-        isFeatured: false,
-        isTopBooked: false,
-        isActive: true,
-    },
-    {
-        id: 104,
-        slug: "dr-pham-thu-ha",
-        specialtyId: 4,
-        fullName: "BS Phạm Thu Hà",
-        title: "Bác sĩ Nhi khoa",
-        gender: "FEMALE",
-        experienceYears: 12,
-        consultationFee: 350000,
-        bookedCount: 244,
-        availableSlotsToday: 3,
-        rating: 4.9,
-        bio: "Theo dõi sức khỏe trẻ em, tư vấn dinh dưỡng và điều trị bệnh hô hấp thường gặp.",
-        hospital: "CarePlus Clinic",
-        image: "https://images.unsplash.com/photo-1594824476967-48c8b964273f?auto=format&fit=crop&w=900&q=80",
-        gallery: [
-            "https://images.unsplash.com/photo-1594824476967-48c8b964273f?auto=format&fit=crop&w=1200&q=80",
-            "https://images.unsplash.com/photo-1603398938378-e54eab446dde?auto=format&fit=crop&w=1200&q=80",
-        ],
-        highlights: ["Khám dinh dưỡng trẻ em", "Theo dõi tăng trưởng", "Hỗ trợ bệnh hô hấp"],
-        availabilityDays: [1, 2, 4, 5],
-        shifts: ["MORNING", "AFTERNOON"],
-        isFeatured: true,
-        isTopBooked: true,
-        isActive: true,
-    },
-    {
-        id: 105,
-        slug: "dr-vo-hoang-yen",
-        specialtyId: 5,
-        fullName: "BS Võ Hoàng Yến",
-        title: "Bác sĩ Da liễu",
-        gender: "FEMALE",
-        experienceYears: 8,
-        consultationFee: 360000,
-        bookedCount: 156,
-        availableSlotsToday: 7,
-        rating: 4.6,
-        bio: "Chuyên trị mụn, viêm da cơ địa, nám da và chăm sóc da chuyên sâu.",
-        hospital: "CarePlus Clinic",
-        image: "https://images.unsplash.com/photo-1651008376811-b90baee60c1f?auto=format&fit=crop&w=900&q=80",
-        gallery: [
-            "https://images.unsplash.com/photo-1651008376811-b90baee60c1f?auto=format&fit=crop&w=1200&q=80",
-            "https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&w=1200&q=80",
-        ],
-        highlights: ["Điều trị mụn cá nhân hóa", "Chăm sóc da nhạy cảm", "Tư vấn nám da"],
-        availabilityDays: [1, 3, 5],
-        shifts: ["AFTERNOON"],
-        isFeatured: false,
-        isTopBooked: false,
-        isActive: true,
-    },
-    {
-        id: 106,
-        slug: "dr-do-quoc-bao",
-        specialtyId: 6,
-        fullName: "BS Đỗ Quốc Bảo",
-        title: "Bác sĩ Tiêu hóa",
-        gender: "MALE",
-        experienceYears: 10,
-        consultationFee: 390000,
-        bookedCount: 210,
-        availableSlotsToday: 4,
-        rating: 4.8,
-        bio: "Theo dõi bệnh dạ dày, đại tràng, gan mật và tư vấn chế độ ăn hỗ trợ điều trị.",
-        hospital: "CarePlus Clinic",
-        image: "https://images.unsplash.com/photo-1582750433449-648ed127bb54?auto=format&fit=crop&w=900&q=80",
-        gallery: [
-            "https://images.unsplash.com/photo-1582750433449-648ed127bb54?auto=format&fit=crop&w=1200&q=80",
-            "https://images.unsplash.com/photo-1631815588090-d1bcbe9a0a5c?auto=format&fit=crop&w=1200&q=80",
-        ],
-        highlights: ["Theo dõi dạ dày mạn tính", "Tư vấn đại tràng kích thích", "Điều chỉnh chế độ ăn"],
-        availabilityDays: [2, 3, 5, 6],
-        shifts: ["MORNING"],
-        isFeatured: false,
-        isTopBooked: true,
-        isActive: true,
-    },
-];
 
 const articles = [
     {
@@ -355,30 +90,16 @@ const slugify = (value = "") => {
         .replace(/^-+|-+$/g, "");
 };
 
-const nextId = (items, fallback) => {
-    return items.length ? Math.max(...items.map((item) => Number(item.id) || 0)) + 1 : fallback;
-};
-
 const formatCompactMoney = (amount) => {
     const numeric = Number(amount) || 0;
     if (!numeric) return "0K";
     return `${Math.round(numeric / 1000)}K`;
 };
 
-const getSpecialtyById = (specialtyId) => specialties.find((item) => item.id === specialtyId);
-
-const syncSpecialtyDoctorCounts = () => {
-    specialties = specialties.map((specialty) => ({
-        ...specialty,
-        doctorCount: doctors.filter((doctor) => doctor.specialtyId === specialty.id).length,
-    }));
-};
-
 const enrichDoctor = (doctor) => {
-    const specialty = getSpecialtyById(doctor.specialtyId);
+    const specialty = doctor.specialty;
     return {
         ...doctor,
-        specialty,
         specialtyName: specialty?.name || "Chưa phân loại",
         consultationFeeLabel: formatCompactMoney(doctor.consultationFee),
         ratingLabel: `⭐ ${doctor.rating || 0} (${doctor.bookedCount || 0})`,
@@ -413,7 +134,11 @@ const buildSlotsForDoctor = (doctor, dateString) => {
     }
 
     const day = date.getDay();
-    if (!doctor.availabilityDays.includes(day)) {
+    const availabilityDays = Array.isArray(doctor.availabilityDays)
+        ? doctor.availabilityDays
+        : JSON.parse(doctor.availabilityDays || "[]");
+
+    if (!availabilityDays.includes(day)) {
         return [];
     }
 
@@ -422,7 +147,11 @@ const buildSlotsForDoctor = (doctor, dateString) => {
         AFTERNOON: ["13:30", "14:00", "14:30", "15:00", "15:30", "16:00", "16:30"],
     };
 
-    const slots = doctor.shifts.flatMap((shift) => shiftSlots[shift] || []);
+    const shifts = Array.isArray(doctor.shifts)
+        ? doctor.shifts
+        : JSON.parse(doctor.shifts || "[]");
+
+    const slots = shifts.flatMap((shift) => shiftSlots[shift] || []);
     const limited = slots.slice(0, Math.max(doctor.availableSlotsToday, 1));
 
     return limited.map((startTime) => {
@@ -437,12 +166,13 @@ const buildSlotsForDoctor = (doctor, dateString) => {
     });
 };
 
-const resolveBySlugOrId = (items, slugOrId) => {
-    return items.find((item) => String(item.id) === String(slugOrId) || item.slug === slugOrId);
+const getSpecialtyById = async (specialtyId) => {
+    const spec = await db.Specialty.findByPk(specialtyId);
+    return spec ? spec.toJSON() : null;
 };
 
-const ensureSpecialtyExists = (specialtyId) => {
-    const specialty = getSpecialtyById(Number(specialtyId));
+const ensureSpecialtyExists = async (specialtyId) => {
+    const specialty = await getSpecialtyById(Number(specialtyId));
     if (!specialty) {
         const error = new Error("Chuyên khoa không tồn tại");
         error.status = 400;
@@ -451,39 +181,47 @@ const ensureSpecialtyExists = (specialtyId) => {
     return specialty;
 };
 
-const ensureUniqueSpecialty = ({ name, slug }, excludeId) => {
+const ensureUniqueSpecialty = async ({ name, slug }, excludeId) => {
     const normalizedSlug = slugify(slug || name);
-    const duplicated = specialties.find((item) => {
-        if (excludeId && Number(item.id) === Number(excludeId)) return false;
-        return item.slug === normalizedSlug || item.name.toLowerCase() === String(name).trim().toLowerCase();
-    });
-
+    const where = {
+        [db.Sequelize.Op.or]: [
+            { slug: normalizedSlug },
+            { name: String(name).trim() }
+        ]
+    };
+    if (excludeId) {
+        where.id = { [db.Sequelize.Op.ne]: excludeId };
+    }
+    const duplicated = await db.Specialty.findOne({ where });
     if (duplicated) {
         const error = new Error("Tên hoặc slug chuyên khoa đã tồn tại");
         error.status = 409;
         throw error;
     }
-
     return normalizedSlug;
 };
 
-const ensureUniqueDoctor = ({ fullName, slug }, excludeId) => {
+const ensureUniqueDoctor = async ({ fullName, slug }, excludeId) => {
     const normalizedSlug = slugify(slug || fullName);
-    const duplicated = doctors.find((item) => {
-        if (excludeId && Number(item.id) === Number(excludeId)) return false;
-        return item.slug === normalizedSlug || item.fullName.toLowerCase() === String(fullName).trim().toLowerCase();
-    });
-
+    const where = {
+        [db.Sequelize.Op.or]: [
+            { slug: normalizedSlug },
+            { fullName: String(fullName).trim() }
+        ]
+    };
+    if (excludeId) {
+        where.id = { [db.Sequelize.Op.ne]: excludeId };
+    }
+    const duplicated = await db.Doctor.findOne({ where });
     if (duplicated) {
         const error = new Error("Tên hoặc slug bác sĩ đã tồn tại");
         error.status = 409;
         throw error;
     }
-
     return normalizedSlug;
 };
 
-const sanitizeSpecialtyPayload = (payload = {}, existing = {}) => {
+const sanitizeSpecialtyPayload = async (payload = {}, existing = {}) => {
     const name = String(payload.name || existing.name || "").trim();
     if (!name) {
         const error = new Error("Tên chuyên khoa là bắt buộc");
@@ -491,21 +229,22 @@ const sanitizeSpecialtyPayload = (payload = {}, existing = {}) => {
         throw error;
     }
 
+    const slug = await ensureUniqueSpecialty({ name, slug: payload.slug }, existing.id);
+
     return {
-        ...existing,
         name,
-        slug: ensureUniqueSpecialty({ name, slug: payload.slug }, existing.id),
+        slug,
         summary: String(payload.summary || existing.summary || "").trim(),
         description: String(payload.description || existing.description || "").trim(),
         icon: String(payload.icon || existing.icon || "🩺").trim(),
         color: String(payload.color || existing.color || "from-sky-50 to-cyan-50").trim(),
-        popularityRank: Number(payload.popularityRank ?? existing.popularityRank ?? specialties.length + 1),
+        popularityRank: Number(payload.popularityRank ?? existing.popularityRank ?? 1),
         isActive: payload.isActive === undefined ? Boolean(existing.isActive ?? true) : String(payload.isActive) !== "false",
         coverImage: String(payload.coverImage || existing.coverImage || "").trim(),
     };
 };
 
-const sanitizeDoctorPayload = (payload = {}, existing = {}) => {
+const sanitizeDoctorPayload = async (payload = {}, existing = {}) => {
     const fullName = String(payload.fullName || existing.fullName || "").trim();
     if (!fullName) {
         const error = new Error("Tên bác sĩ là bắt buộc");
@@ -514,7 +253,7 @@ const sanitizeDoctorPayload = (payload = {}, existing = {}) => {
     }
 
     const specialtyId = Number(payload.specialtyId ?? existing.specialtyId);
-    ensureSpecialtyExists(specialtyId);
+    await ensureSpecialtyExists(specialtyId);
 
     const parsedFee = Number(payload.consultationFee ?? existing.consultationFee ?? 0);
     const parsedExperience = Number(payload.experienceYears ?? existing.experienceYears ?? 0);
@@ -522,10 +261,11 @@ const sanitizeDoctorPayload = (payload = {}, existing = {}) => {
     const parsedBooked = Number(payload.bookedCount ?? existing.bookedCount ?? 0);
     const parsedSlots = Number(payload.availableSlotsToday ?? existing.availableSlotsToday ?? 0);
 
+    const slug = await ensureUniqueDoctor({ fullName, slug: payload.slug }, existing.id);
+
     return {
-        ...existing,
         fullName,
-        slug: ensureUniqueDoctor({ fullName, slug: payload.slug }, existing.id),
+        slug,
         title: String(payload.title || existing.title || "").trim(),
         specialtyId,
         gender: String(payload.gender || existing.gender || "OTHER").toUpperCase(),
@@ -563,105 +303,149 @@ const sanitizeDoctorPayload = (payload = {}, existing = {}) => {
     };
 };
 
-const listSpecialties = (query = {}) => {
-    const keyword = (query.search || "").trim().toLowerCase();
-    let results = [...specialties].filter((item) => item.isActive !== false);
-
+const listSpecialties = async (query = {}) => {
+    const keyword = (query.search || "").trim();
+    const where = { is_active: true };
     if (keyword) {
-        results = results.filter((item) =>
-            `${item.name} ${item.summary} ${item.description}`.toLowerCase().includes(keyword)
-        );
+        where[db.Sequelize.Op.or] = [
+            { name: { [db.Sequelize.Op.like]: `%${keyword}%` } },
+            { summary: { [db.Sequelize.Op.like]: `%${keyword}%` } },
+            { description: { [db.Sequelize.Op.like]: `%${keyword}%` } }
+        ];
     }
-
+    const order = [];
     if (query.sort === "popular") {
-        results.sort((a, b) => a.popularityRank - b.popularityRank);
+        order.push(["popularityRank", "ASC"]);
     } else {
-        results.sort((a, b) => a.name.localeCompare(b.name, "vi"));
+        order.push(["name", "ASC"]);
     }
-
+    const list = await db.Specialty.findAll({
+        where,
+        order,
+        include: [{
+            model: db.Doctor,
+            as: "doctors",
+            where: { is_active: true },
+            required: false
+        }]
+    });
+    const items = list.map(item => {
+        const json = item.toJSON();
+        return {
+            ...json,
+            doctorCount: json.doctors ? json.doctors.length : 0,
+            doctors: json.doctors ? json.doctors.length : 0
+        };
+    });
     return {
-        items: results.map((item) => ({
-            ...item,
-            doctors: doctors.filter((doctor) => doctor.specialtyId === item.id && doctor.isActive !== false).length,
-        })),
-        total: results.length,
+        items,
+        total: items.length
     };
 };
 
-const getSpecialtyDetail = (slugOrId) => {
-    const specialty = resolveBySlugOrId(specialties, slugOrId);
-    if (!specialty || specialty.isActive === false) {
-        return null;
-    }
-
-    const specialtyDoctors = doctors
-        .filter((doctor) => doctor.specialtyId === specialty.id && doctor.isActive !== false)
-        .map(enrichDoctor);
+const getSpecialtyDetail = async (slugOrId) => {
+    const isId = !isNaN(slugOrId) && String(slugOrId).trim() !== "";
+    const where = isId ? { id: Number(slugOrId) } : { slug: slugOrId };
+    where.is_active = true;
+    const specialty = await db.Specialty.findOne({ where });
+    if (!specialty) return null;
+    const doctorsList = await db.Doctor.findAll({
+        where: { specialtyId: specialty.id, is_active: true },
+        include: [{ model: db.Specialty, as: "specialty" }]
+    });
     return {
-        ...specialty,
-        doctors: specialtyDoctors,
+        ...specialty.toJSON(),
+        doctors: doctorsList.map(doc => enrichDoctor(doc.toJSON()))
     };
 };
 
-const listDoctors = (query = {}) => {
-    const keyword = (query.search || "").trim().toLowerCase();
-    let results = doctors.filter((doctor) => doctor.isActive !== false).map(enrichDoctor);
+const listDoctors = async (query = {}) => {
+    const keyword = (query.search || "").trim();
+    const where = { is_active: true };
 
     if (keyword) {
-        results = results.filter((doctor) =>
-            `${doctor.fullName} ${doctor.title} ${doctor.bio} ${doctor.specialty?.name || ""}`.toLowerCase().includes(keyword)
-        );
+        where[db.Sequelize.Op.or] = [
+            { fullName: { [db.Sequelize.Op.like]: `%${keyword}%` } },
+            { title: { [db.Sequelize.Op.like]: `%${keyword}%` } },
+            { bio: { [db.Sequelize.Op.like]: `%${keyword}%` } }
+        ];
     }
-
     if (query.specialty) {
-        results = results.filter((doctor) =>
-            String(doctor.specialtyId) === String(query.specialty) || doctor.specialty?.slug === query.specialty
-        );
+        const specWhere = isNaN(query.specialty) ? { slug: query.specialty } : { id: Number(query.specialty) };
+        const specialty = await db.Specialty.findOne({ where: specWhere });
+        if (specialty) {
+            where.specialtyId = specialty.id;
+        } else {
+            return { items: [], total: 0 };
+        }
     }
-
     if (query.gender) {
-        results = results.filter((doctor) => doctor.gender === String(query.gender).toUpperCase());
+        where.gender = String(query.gender).toUpperCase();
     }
-
     if (query.minFee) {
-        results = results.filter((doctor) => doctor.consultationFee >= Number(query.minFee));
+        where.consultationFee = { ...where.consultationFee, [db.Sequelize.Op.gte]: Number(query.minFee) };
     }
-
     if (query.maxFee) {
-        results = results.filter((doctor) => doctor.consultationFee <= Number(query.maxFee));
+        where.consultationFee = { ...where.consultationFee, [db.Sequelize.Op.lte]: Number(query.maxFee) };
     }
-
     if (query.minExperience) {
-        results = results.filter((doctor) => doctor.experienceYears >= Number(query.minExperience));
+        where.experienceYears = { [db.Sequelize.Op.gte]: Number(query.minExperience) };
     }
-
     if (query.availableOnly === "true") {
-        results = results.filter((doctor) => doctor.availableSlotsToday > 0);
+        where.availableSlotsToday = { [db.Sequelize.Op.gt]: 0 };
     }
 
+    let order = [];
+    if (query.sort === "fee_asc") {
+        order.push(["consultationFee", "ASC"]);
+    } else if (query.sort === "fee_desc") {
+        order.push(["consultationFee", "DESC"]);
+    } else if (query.sort === "booked_desc") {
+        order.push(["bookedCount", "DESC"]);
+    } else if (query.sort === "rating_desc") {
+        order.push(["rating", "DESC"]);
+    } else if (query.sort === "name_asc") {
+        order.push(["fullName", "ASC"]);
+    } else {
+        order.push(["bookedCount", "DESC"]);
+    }
+
+    const list = await db.Doctor.findAll({
+        where,
+        order,
+        include: [{ model: db.Specialty, as: "specialty" }]
+    });
+
+    let results = list.map(item => enrichDoctor(item.toJSON()));
     if (query.date) {
-        results = results.filter((doctor) => buildSlotsForDoctor(doctor, query.date).length > 0);
+        results = results.filter(doctor => buildSlotsForDoctor(doctor, query.date).length > 0);
     }
-
-    results = sortByQuery(results, query.sort || "booked_desc");
-
     return {
         items: results,
-        total: results.length,
+        total: results.length
     };
 };
 
-const getDoctorDetail = (slugOrId) => {
-    const doctor = resolveBySlugOrId(doctors, slugOrId);
-    if (!doctor || doctor.isActive === false) {
-        return null;
-    }
+const getDoctorDetail = async (slugOrId) => {
+    const isId = !isNaN(slugOrId) && String(slugOrId).trim() !== "";
+    const where = isId ? { id: Number(slugOrId) } : { slug: slugOrId };
+    where.is_active = true;
+    const doctor = await db.Doctor.findOne({
+        where,
+        include: [{ model: db.Specialty, as: "specialty" }]
+    });
+    if (!doctor) return null;
+    const enriched = enrichDoctor(doctor.toJSON());
 
-    const enriched = enrichDoctor(doctor);
-    const relatedDoctors = doctors
-        .filter((item) => item.specialtyId === doctor.specialtyId && item.id !== doctor.id && item.isActive !== false)
-        .slice(0, 3)
-        .map(enrichDoctor);
+    const related = await db.Doctor.findAll({
+        where: {
+            specialtyId: doctor.specialtyId,
+            id: { [db.Sequelize.Op.ne]: doctor.id },
+            is_active: true
+        },
+        limit: 3,
+        include: [{ model: db.Specialty, as: "specialty" }]
+    });
 
     const nextThreeDays = Array.from({ length: 3 }, (_, index) => {
         const date = new Date();
@@ -669,14 +453,14 @@ const getDoctorDetail = (slugOrId) => {
         const dateString = date.toISOString().slice(0, 10);
         return {
             date: dateString,
-            slots: buildSlotsForDoctor(doctor, dateString),
+            slots: buildSlotsForDoctor(enriched, dateString),
         };
     });
 
     return {
         ...enriched,
-        relatedDoctors,
-        schedules: nextThreeDays,
+        relatedDoctors: related.map(r => enrichDoctor(r.toJSON())),
+        schedules: nextThreeDays
     };
 };
 
@@ -715,65 +499,109 @@ const getArticleDetail = (slugOrId) => {
     };
 };
 
-const getAvailableSlots = (slugOrId, date) => {
-    const doctor = resolveBySlugOrId(doctors, slugOrId);
-    if (!doctor || doctor.isActive === false) {
-        return null;
-    }
-
-    return buildSlotsForDoctor(doctor, date);
+const resolveBySlugOrId = (items, slugOrId) => {
+    return items.find((item) => String(item.id) === String(slugOrId) || item.slug === slugOrId);
 };
 
-const getHomeData = () => {
-    syncSpecialtyDoctorCounts();
+const getAvailableSlots = async (slugOrId, date) => {
+    const isId = !isNaN(slugOrId) && String(slugOrId).trim() !== "";
+    const where = isId ? { id: Number(slugOrId) } : { slug: slugOrId };
+    where.is_active = true;
+    const doctor = await db.Doctor.findOne({ where });
+    if (!doctor) return null;
+    return buildSlotsForDoctor(doctor.toJSON(), date);
+};
 
-    const featuredDoctors = doctors.filter((doctor) => doctor.isFeatured && doctor.isActive !== false).slice(0, 4).map(enrichDoctor);
-    const topBookedDoctors = sortByQuery(doctors.filter((doctor) => doctor.isActive !== false).map(enrichDoctor), "booked_desc").slice(0, 4);
-    const featuredSpecialties = specialties.filter((specialty) => specialty.isActive !== false).slice(0, 8).map((specialty) => ({
-        ...specialty,
-        doctors: doctors.filter((doctor) => doctor.specialtyId === specialty.id && doctor.isActive !== false).length,
+const getHomeData = async () => {
+    const activeSpecs = await db.Specialty.findAll({
+        where: { is_active: true },
+        limit: 8,
+        order: [["popularityRank", "ASC"]]
+    });
+
+    const specsJson = await Promise.all(activeSpecs.map(async (spec) => {
+        const count = await db.Doctor.count({ where: { specialtyId: spec.id, is_active: true } });
+        return {
+            ...spec.toJSON(),
+            doctors: count,
+            doctorCount: count
+        };
     }));
+
+    const featuredDocs = await db.Doctor.findAll({
+        where: { isFeatured: true, is_active: true },
+        limit: 4,
+        include: [{ model: db.Specialty, as: "specialty" }]
+    });
+
+    const topBookedDocs = await db.Doctor.findAll({
+        where: { is_active: true },
+        order: [["bookedCount", "DESC"]],
+        limit: 4,
+        include: [{ model: db.Specialty, as: "specialty" }]
+    });
+
+    const totalSpecs = await db.Specialty.count({ where: { is_active: true } });
+    const totalDocs = await db.Doctor.count({ where: { is_active: true } });
+
     const latestArticles = sortByQuery(articles, "latest").slice(0, 4);
 
     return {
         clinicInfo: CLINIC_INFO,
         stats: {
-            specialties: specialties.filter((item) => item.isActive !== false).length,
-            doctors: doctors.filter((item) => item.isActive !== false).length,
+            specialties: totalSpecs,
+            doctors: totalDocs,
             trustedPatients: 1000,
-            averageRating: 4.8,
+            averageRating: 4.8
         },
-        featuredSpecialties,
-        featuredDoctors,
-        topBookedDoctors,
-        latestArticles,
+        featuredSpecialties: specsJson,
+        featuredDoctors: featuredDocs.map(d => enrichDoctor(d.toJSON())),
+        topBookedDoctors: topBookedDocs.map(d => enrichDoctor(d.toJSON())),
+        latestArticles
     };
 };
 
-const getAdminDashboardData = () => {
-    syncSpecialtyDoctorCounts();
+const getAdminDashboardData = async () => {
+    const totalSpecs = await db.Specialty.count({ where: { is_active: true } });
+    const activeDocs = await db.Doctor.findAll({
+        where: { is_active: true },
+        include: [{ model: db.Specialty, as: "specialty" }]
+    });
+    const allDocs = await db.Doctor.findAll();
 
-    const activeDoctors = doctors.filter((item) => item.isActive !== false);
-    const totalBookings = doctors.reduce((total, item) => total + (item.bookedCount || 0), 0);
-    const averageFee = activeDoctors.length
-        ? Math.round(activeDoctors.reduce((total, item) => total + (item.consultationFee || 0), 0) / activeDoctors.length)
+    const totalBookings = allDocs.reduce((total, item) => total + (item.bookedCount || 0), 0);
+    const averageFee = activeDocs.length
+        ? Math.round(activeDocs.reduce((total, item) => total + (item.consultationFee || 0), 0) / activeDocs.length)
         : 0;
-    const averageRating = activeDoctors.length
-        ? Number((activeDoctors.reduce((total, item) => total + (item.rating || 0), 0) / activeDoctors.length).toFixed(1))
+    const averageRating = activeDocs.length
+        ? Number((activeDocs.reduce((total, item) => total + (item.rating || 0), 0) / activeDocs.length).toFixed(1))
         : 0;
+
+    const allSpecs = await db.Specialty.findAll();
+    const topSpecsRaw = await Promise.all(allSpecs.map(async (spec) => {
+        const count = await db.Doctor.count({ where: { specialtyId: spec.id, is_active: true } });
+        return {
+            id: spec.id,
+            name: spec.name,
+            doctorCount: count
+        };
+    }));
+    const topSpecialties = topSpecsRaw.sort((a, b) => b.doctorCount - a.doctorCount).slice(0, 4);
+
+    const recentDoctorsRaw = [...activeDocs].sort((a, b) => b.bookedCount - a.bookedCount).slice(0, 5);
 
     return {
         stats: [
             {
                 key: "specialties",
                 title: "Chuyên khoa đang hoạt động",
-                value: specialties.filter((item) => item.isActive !== false).length,
+                value: totalSpecs,
                 description: "Nhóm dịch vụ đang mở cho bệnh nhân đặt lịch.",
             },
             {
                 key: "doctors",
                 title: "Bác sĩ đang hoạt động",
-                value: activeDoctors.length,
+                value: activeDocs.length,
                 description: "Đang hiển thị ở trang công khai và có thể được đặt lịch.",
             },
             {
@@ -791,154 +619,144 @@ const getAdminDashboardData = () => {
         ],
         highlights: {
             averageFee,
-            pendingDoctorProfiles: doctors.filter((item) => !item.isActive).length,
-            featuredDoctors: activeDoctors.filter((item) => item.isFeatured).length,
-            topSpecialties: specialties
-                .map((item) => ({
-                    id: item.id,
-                    name: item.name,
-                    doctorCount: doctors.filter((doctor) => doctor.specialtyId === item.id && doctor.isActive !== false).length,
-                }))
-                .sort((a, b) => b.doctorCount - a.doctorCount)
-                .slice(0, 4),
+            pendingDoctorProfiles: allDocs.filter((item) => !item.isActive).length,
+            featuredDoctors: activeDocs.filter((item) => item.isFeatured).length,
+            topSpecialties,
         },
-        recentDoctors: sortByQuery(activeDoctors.map(enrichDoctor), "booked_desc").slice(0, 5),
+        recentDoctors: recentDoctorsRaw.map(d => enrichDoctor(d.toJSON()))
     };
 };
 
-const listAdminSpecialties = (query = {}) => {
-    syncSpecialtyDoctorCounts();
+const listAdminSpecialties = async (query = {}) => {
     const keyword = String(query.search || "").trim().toLowerCase();
-    let items = specialties.map((item) => ({
-        ...item,
-        doctorCount: doctors.filter((doctor) => doctor.specialtyId === item.id).length,
-    }));
+    const where = {};
+    if (query.status === "active") {
+        where.is_active = true;
+    } else if (query.status === "inactive") {
+        where.is_active = false;
+    }
 
     if (keyword) {
-        items = items.filter((item) =>
-            `${item.name} ${item.summary} ${item.description}`.toLowerCase().includes(keyword)
-        );
+        where[db.Sequelize.Op.or] = [
+            { name: { [db.Sequelize.Op.like]: `%${keyword}%` } },
+            { summary: { [db.Sequelize.Op.like]: `%${keyword}%` } },
+            { description: { [db.Sequelize.Op.like]: `%${keyword}%` } }
+        ];
     }
 
-    if (query.status === "active") {
-        items = items.filter((item) => item.isActive !== false);
-    }
+    const order = [["name", "ASC"]];
 
-    if (query.status === "inactive") {
-        items = items.filter((item) => item.isActive === false);
-    }
+    const list = await db.Specialty.findAll({
+        where,
+        order
+    });
 
-    items = sortByQuery(items, query.sort || "name_asc");
+    const items = await Promise.all(list.map(async (item) => {
+        const count = await db.Doctor.count({ where: { specialtyId: item.id } });
+        return {
+            ...item.toJSON(),
+            doctorCount: count,
+            doctors: count
+        };
+    }));
 
     return {
         items,
         total: items.length,
-        pageSize: ADMIN_PAGE_SIZE,
+        pageSize: ADMIN_PAGE_SIZE
     };
 };
 
-const createSpecialty = (payload = {}) => {
-    const specialty = sanitizeSpecialtyPayload(payload);
-    const record = {
-        id: nextId(specialties, 1),
-        ...specialty,
-    };
-    specialties = [record, ...specialties];
-    syncSpecialtyDoctorCounts();
-    return record;
+const createSpecialty = async (payload = {}) => {
+    const specialty = await sanitizeSpecialtyPayload(payload);
+    const record = await db.Specialty.create(specialty);
+    return record.toJSON();
 };
 
-const updateSpecialty = (id, payload = {}) => {
-    const current = specialties.find((item) => Number(item.id) === Number(id));
-    if (!current) {
-        return null;
-    }
+const updateSpecialty = async (id, payload = {}) => {
+    const current = await db.Specialty.findByPk(id);
+    if (!current) return null;
 
-    const updated = sanitizeSpecialtyPayload(payload, current);
-    specialties = specialties.map((item) => (Number(item.id) === Number(id) ? { ...current, ...updated } : item));
-    syncSpecialtyDoctorCounts();
-    return specialties.find((item) => Number(item.id) === Number(id));
+    const updated = await sanitizeSpecialtyPayload(payload, current.toJSON());
+    await current.update(updated);
+    return current.toJSON();
 };
 
-const deleteSpecialty = (id) => {
-    const current = specialties.find((item) => Number(item.id) === Number(id));
-    if (!current) {
-        return false;
-    }
+const deleteSpecialty = async (id) => {
+    const current = await db.Specialty.findByPk(id);
+    if (!current) return false;
 
-    const hasDoctors = doctors.some((doctor) => Number(doctor.specialtyId) === Number(id));
-    if (hasDoctors) {
+    const hasDoctors = await db.Doctor.count({ where: { specialtyId: id } });
+    if (hasDoctors > 0) {
         const error = new Error("Không thể xóa chuyên khoa đang có bác sĩ liên kết");
         error.status = 409;
         throw error;
     }
 
-    specialties = specialties.filter((item) => Number(item.id) !== Number(id));
+    await current.destroy();
     return true;
 };
 
-const listAdminDoctors = (query = {}) => {
-    const keyword = String(query.search || "").trim().toLowerCase();
-    let items = doctors.map(enrichDoctor);
+const listAdminDoctors = async (query = {}) => {
+    const keyword = String(query.search || "").trim();
+    const where = {};
+    if (query.status === "active") {
+        where.is_active = true;
+    } else if (query.status === "inactive") {
+        where.is_active = false;
+    }
+    if (query.specialtyId) {
+        where.specialtyId = Number(query.specialtyId);
+    }
 
     if (keyword) {
-        items = items.filter((item) =>
-            `${item.fullName} ${item.title} ${item.specialtyName} ${item.bio}`.toLowerCase().includes(keyword)
-        );
+        where[db.Sequelize.Op.or] = [
+            { fullName: { [db.Sequelize.Op.like]: `%${keyword}%` } },
+            { title: { [db.Sequelize.Op.like]: `%${keyword}%` } },
+            { bio: { [db.Sequelize.Op.like]: `%${keyword}%` } }
+        ];
     }
 
-    if (query.specialtyId) {
-        items = items.filter((item) => String(item.specialtyId) === String(query.specialtyId));
-    }
+    const order = [["bookedCount", "DESC"]];
 
-    if (query.status === "active") {
-        items = items.filter((item) => item.isActive !== false);
-    }
-
-    if (query.status === "inactive") {
-        items = items.filter((item) => item.isActive === false);
-    }
-
-    items = sortByQuery(items, query.sort || "booked_desc");
+    const list = await db.Doctor.findAll({
+        where,
+        order,
+        include: [{ model: db.Specialty, as: "specialty" }]
+    });
 
     return {
-        items,
-        total: items.length,
-        pageSize: ADMIN_PAGE_SIZE,
+        items: list.map(d => enrichDoctor(d.toJSON())),
+        total: list.length,
+        pageSize: ADMIN_PAGE_SIZE
     };
 };
 
-const createDoctor = (payload = {}) => {
-    const doctor = sanitizeDoctorPayload(payload);
-    const record = {
-        id: nextId(doctors, 100),
-        ...doctor,
-    };
-    doctors = [record, ...doctors];
-    syncSpecialtyDoctorCounts();
-    return enrichDoctor(record);
+const createDoctor = async (payload = {}) => {
+    const doctor = await sanitizeDoctorPayload(payload);
+    const record = await db.Doctor.create(doctor);
+    const refetched = await db.Doctor.findByPk(record.id, {
+        include: [{ model: db.Specialty, as: "specialty" }]
+    });
+    return enrichDoctor(refetched.toJSON());
 };
 
-const updateDoctor = (id, payload = {}) => {
-    const current = doctors.find((item) => Number(item.id) === Number(id));
-    if (!current) {
-        return null;
-    }
+const updateDoctor = async (id, payload = {}) => {
+    const current = await db.Doctor.findByPk(id);
+    if (!current) return null;
 
-    const updated = sanitizeDoctorPayload(payload, current);
-    doctors = doctors.map((item) => (Number(item.id) === Number(id) ? { ...current, ...updated } : item));
-    syncSpecialtyDoctorCounts();
-    return enrichDoctor(doctors.find((item) => Number(item.id) === Number(id)));
+    const updated = await sanitizeDoctorPayload(payload, current.toJSON());
+    await current.update(updated);
+    const refetched = await db.Doctor.findByPk(id, {
+        include: [{ model: db.Specialty, as: "specialty" }]
+    });
+    return enrichDoctor(refetched.toJSON());
 };
 
-const deleteDoctor = (id) => {
-    const exists = doctors.some((item) => Number(item.id) === Number(id));
-    if (!exists) {
-        return false;
-    }
-
-    doctors = doctors.filter((item) => Number(item.id) !== Number(id));
-    syncSpecialtyDoctorCounts();
+const deleteDoctor = async (id) => {
+    const current = await db.Doctor.findByPk(id);
+    if (!current) return false;
+    await current.destroy();
     return true;
 };
 
