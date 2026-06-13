@@ -563,6 +563,12 @@ const getHomeData = async () => {
 
 const getAdminDashboardData = async () => {
     const totalSpecs = await db.Specialty.count({ where: { is_active: true } });
+    const totalUsers = await db.User.count();
+    const totalAdmins = await db.User.count({ where: { role: "admin" } });
+    const activeUsers = await db.User.count({ where: { isActive: true } });
+    const lockedUsers = await db.User.count({ where: { isLocked: true } });
+    const bookingLockedUsers = await db.PatientProfile.count({ where: { bookingLocked: true } });
+    const totalNoShows = await db.PatientProfile.sum("noShowCount") || 0;
     const activeDocs = await db.Doctor.findAll({
         where: { is_active: true },
         include: [{ model: db.Specialty, as: "specialty" }]
@@ -616,12 +622,23 @@ const getAdminDashboardData = async () => {
                 value: averageRating,
                 description: "Tính trên toàn bộ bác sĩ đang hoạt động.",
             },
+            {
+                key: "users",
+                title: "Tài khoản trong hệ thống",
+                value: totalUsers,
+                description: "Bao gồm quản trị viên và người dùng đang lưu trong hệ thống.",
+            },
         ],
         highlights: {
             averageFee,
             pendingDoctorProfiles: allDocs.filter((item) => !item.isActive).length,
             featuredDoctors: activeDocs.filter((item) => item.isFeatured).length,
             topSpecialties,
+            activeUsers,
+            lockedUsers,
+            totalAdmins,
+            bookingLockedUsers,
+            totalNoShows,
         },
         recentDoctors: recentDoctorsRaw.map(d => enrichDoctor(d.toJSON()))
     };

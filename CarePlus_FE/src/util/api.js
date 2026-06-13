@@ -159,3 +159,31 @@ export const updateAdminDoctor = (doctorId, data) => {
 export const deleteAdminDoctor = (doctorId) => {
     return axios.delete(`/api/admin/doctors/${doctorId}`);
 };
+
+export const getAdminUsers = (params) => {
+    return axios.get("/api/admin/users", { params });
+};
+
+export const createAdminUser = (data) => {
+    return axios.post("/api/admin/users", data);
+};
+
+export const updateAdminUser = (userId, data) => {
+    return axios.put(`/api/admin/users/${userId}`, data);
+};
+
+export const deleteAdminUser = (userId) => {
+    return axios.delete(`/api/admin/users/${userId}`);
+};
+
+export const toggleAdminUserLock = (userId, locked) => {
+    return axios.post(`/api/admin/users/${userId}/toggle-lock`, { locked });
+};
+
+export const toggleAdminUserBookingLock = (userId, payload) => {
+    return axios.post(`/api/admin/users/${userId}/toggle-booking-lock`, payload);
+};
+
+export const resetAdminUserNoShow = (userId) => {
+    return axios.post(`/api/admin/users/${userId}/reset-no-show`);
+};

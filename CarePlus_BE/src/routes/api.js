@@ -35,5 +35,12 @@ router.get("/api/admin/doctors", adminCatalogController.getDoctors);
 router.post("/api/admin/doctors", adminCatalogController.createDoctor);
 router.put("/api/admin/doctors/:id", adminCatalogController.updateDoctor);
 router.delete("/api/admin/doctors/:id", adminCatalogController.deleteDoctor);
+router.get("/api/admin/users", adminCatalogController.getUsers);
+router.post("/api/admin/users", adminCatalogController.createUser);
+router.put("/api/admin/users/:id", adminCatalogController.updateUser);
+router.delete("/api/admin/users/:id", adminCatalogController.deleteUser);
+router.post("/api/admin/users/:id/toggle-lock", adminCatalogController.toggleUserAccountLock);
+router.post("/api/admin/users/:id/toggle-booking-lock", adminCatalogController.toggleUserBookingLock);
+router.post("/api/admin/users/:id/reset-no-show", adminCatalogController.resetUserNoShow);
 
 module.exports = router;

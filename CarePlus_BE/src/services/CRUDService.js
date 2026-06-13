@@ -133,6 +133,8 @@ const buildUserOutput = (userInstance) => {
         isLocked: user.isLocked,
         lastLoginAt: user.lastLoginAt,
         avatar: user.avatar || null,
+        createdAt: user.createdAt || null,
+        updatedAt: user.updatedAt || null,
 
         fullName,
         firstName: user.firstName || nameParts.firstName,
@@ -246,6 +248,57 @@ const getAllUsers = async () => {
     return users.map(buildUserOutput);
 };
 
+const getAdminUsers = async (query = {}) => {
+    const users = await getAllUsers();
+    const keyword = String(query.search || "").trim().toLowerCase();
+
+    const filtered = users.filter((user) => {
+        const matchesKeyword = !keyword || [
+            user.username,
+            user.email,
+            user.fullName,
+            user.phone,
+            user.role,
+        ]
+            .filter(Boolean)
+            .some((value) => String(value).toLowerCase().includes(keyword));
+
+        const matchesRole = !query.role || query.role === "all" || user.role === query.role;
+
+        const matchesStatus = !query.status || query.status === "all" || (
+            query.status === "active" ? user.isActive : !user.isActive
+        );
+
+        const matchesAccountLock = !query.accountLock || query.accountLock === "all" || (
+            query.accountLock === "locked" ? user.isLocked : !user.isLocked
+        );
+
+        const bookingLocked = Boolean(user.patientProfile?.bookingLocked);
+        const matchesBookingLock = !query.bookingLock || query.bookingLock === "all" || (
+            query.bookingLock === "locked" ? bookingLocked : !bookingLocked
+        );
+
+        return matchesKeyword && matchesRole && matchesStatus && matchesAccountLock && matchesBookingLock;
+    });
+
+    const patientUsers = users.filter((user) => user.role === ACTIVE_PATIENT_ROLE);
+    const staffUsers = users.filter((user) => user.role === "admin");
+
+    return {
+        items: filtered,
+        total: filtered.length,
+        stats: {
+            totalUsers: users.length,
+            totalPatients: patientUsers.length,
+            totalAdmins: staffUsers.length,
+            activeUsers: users.filter((user) => user.isActive).length,
+            lockedUsers: users.filter((user) => user.isLocked).length,
+            bookingLockedUsers: patientUsers.filter((user) => user.patientProfile?.bookingLocked).length,
+            totalNoShows: patientUsers.reduce((sum, user) => sum + (user.patientProfile?.noShowCount || 0), 0),
+        },
+    };
+};
+
 const getUserInfoById = async (userId) => {
     const user = await db.User.findOne({
         where: { id: userId },
@@ -254,6 +307,19 @@ const getUserInfoById = async (userId) => {
     });
 
     return buildUserOutput(user);
+};
+
+const getUserRecordById = async (userId, transaction) => {
+    const options = {
+        where: { id: userId },
+        include: getUserInclude(),
+    };
+
+    if (transaction) {
+        options.transaction = transaction;
+    }
+
+    return db.User.findOne(options);
 };
 
 const getUserInfoByEmail = async (email) => {
@@ -402,10 +468,79 @@ const deleteUserById = async (userId) => {
     }
 };
 
+const toggleUserAccountLock = async (userId, forceState) => {
+    const user = await db.User.findByPk(userId);
+    if (!user) {
+        throw new Error("Không tìm thấy người dùng");
+    }
+
+    user.isLocked = typeof forceState === "boolean" ? forceState : !user.isLocked;
+    await user.save();
+
+    return buildUserOutput(await getUserRecordById(user.id));
+};
+
+const toggleUserBookingLock = async (userId, payload = {}) => {
+    const transaction = await db.sequelize.transaction();
+    try {
+        const user = await db.User.findByPk(userId, { transaction });
+        if (!user) {
+            throw new Error("Không tìm thấy người dùng");
+        }
+
+        if (user.role !== ACTIVE_PATIENT_ROLE) {
+            throw new Error("Chỉ có thể khóa đặt lịch đối với tài khoản bệnh nhân");
+        }
+
+        const profile = await ensurePatientProfile(user, transaction);
+        const nextLocked = typeof payload.locked === "boolean"
+            ? payload.locked
+            : !profile.bookingLocked;
+
+        profile.bookingLocked = nextLocked;
+        profile.bookingLockedReason = nextLocked
+            ? (String(payload.reason || "").trim() || "Khóa đặt lịch bởi quản trị viên")
+            : null;
+        profile.bookingLockedAt = nextLocked ? new Date() : null;
+        await profile.save({ transaction });
+
+        await transaction.commit();
+        return buildUserOutput(await getUserRecordById(user.id));
+    } catch (error) {
+        await transaction.rollback();
+        throw error;
+    }
+};
+
+const resetUserNoShow = async (userId) => {
+    const transaction = await db.sequelize.transaction();
+    try {
+        const user = await db.User.findByPk(userId, { transaction });
+        if (!user) {
+            throw new Error("Không tìm thấy người dùng");
+        }
+
+        if (user.role !== ACTIVE_PATIENT_ROLE) {
+            throw new Error("Chỉ có thể reset no-show đối với tài khoản bệnh nhân");
+        }
+
+        const profile = await ensurePatientProfile(user, transaction);
+        profile.noShowCount = 0;
+        await profile.save({ transaction });
+
+        await transaction.commit();
+        return buildUserOutput(await getUserRecordById(user.id));
+    } catch (error) {
+        await transaction.rollback();
+        throw error;
+    }
+};
+
 module.exports = {
     createNewUser,
     hashUserPassword,
     getAllUsers,
+    getAdminUsers,
     getUserInfoById,
     getUserInfoByEmail,
     updateUserOTP,
@@ -414,4 +549,7 @@ module.exports = {
     updateOwnProfile,
     deleteUserById,
     ensurePatientProfile,
+    toggleUserAccountLock,
+    toggleUserBookingLock,
+    resetUserNoShow,
 };
