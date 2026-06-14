@@ -15,6 +15,7 @@ import { useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import { logout } from "../../store/slices/authSlice";
+import NotificationBell from "../ui/NotificationBell";
 
 const PRIMARY_ITEMS = [
     { key: "dashboard", label: "Tổng quan", href: "/admin/dashboard", icon: PieChartOutlined },
@@ -148,14 +149,17 @@ const AdminLayout = ({ title, activeKey, actions, children }) => {
                                 <span className="text-[10px] font-semibold text-slate-700">CarePlus</span>
                             </div>
 
-                            <button
-                                className="inline-flex items-center gap-1.5 text-[10px] text-slate-400 transition hover:text-slate-700"
-                                onClick={handleLogout}
-                                type="button"
-                            >
-                                <LogoutOutlined className="text-[10px]" />
-                                <span>Đăng xuất</span>
-                            </button>
+                            <div className="flex items-center gap-3">
+                                <NotificationBell compact />
+                                <button
+                                    className="inline-flex items-center gap-1.5 text-[10px] text-slate-400 transition hover:text-slate-700"
+                                    onClick={handleLogout}
+                                    type="button"
+                                >
+                                    <LogoutOutlined className="text-[10px]" />
+                                    <span>Đăng xuất</span>
+                                </button>
+                            </div>
                         </header>
 
                         <main className="flex-1 px-4 py-4">

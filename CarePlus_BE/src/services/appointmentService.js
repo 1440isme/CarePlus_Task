@@ -1,5 +1,6 @@
 import db from "../models/index";
 import CRUDService from "./CRUDService";
+import notificationService from "./notificationService";
 
 const ACTIVE_APPOINTMENT_STATUSES = ["PENDING", "CONFIRMED", "COMPLETED"];
 
@@ -200,6 +201,20 @@ const createAppointment = async (userId, payload = {}) => {
         doctor.bookedCount = (doctor.bookedCount || 0) + 1;
         await doctor.save({ transaction });
 
+        await notificationService.createForUsers([userId], {
+            title: "Đặt lịch thành công",
+            message: `Lịch khám với ${doctor.fullName} vào ${appointmentDate} lúc ${selectedSlot.startTime} đã được xác nhận.`,
+            type: "appointment_confirmed",
+            link: "/user/profile",
+        }, { transaction });
+
+        await notificationService.notifyAdmins({
+            title: "Lịch hẹn mới",
+            message: `${patientName} vừa đặt lịch với ${doctor.fullName} vào ${appointmentDate} lúc ${selectedSlot.startTime}.`,
+            type: "appointment_new",
+            link: "/admin/dashboard",
+        }, { transaction });
+
         await transaction.commit();
 
         const refetched = await db.Appointment.findByPk(appointment.id, {
@@ -264,6 +279,20 @@ const cancelAppointment = async (userId, appointmentId) => {
             appointment.doctor.bookedCount = Math.max(0, (appointment.doctor.bookedCount || 0) - 1);
             await appointment.doctor.save({ transaction });
         }
+
+        await notificationService.createForUsers([userId], {
+            title: "Đã hủy lịch hẹn",
+            message: `Lịch khám với ${appointment.doctor?.fullName || "bác sĩ"} vào ${appointment.appointmentDate} lúc ${appointment.startTime} đã được hủy.`,
+            type: "appointment_cancelled",
+            link: "/user/profile",
+        }, { transaction });
+
+        await notificationService.notifyAdmins({
+            title: "Bệnh nhân hủy lịch",
+            message: `${appointment.patientName} đã hủy lịch với ${appointment.doctor?.fullName || "bác sĩ"} vào ${appointment.appointmentDate} lúc ${appointment.startTime}.`,
+            type: "appointment_cancelled",
+            link: "/admin/dashboard",
+        }, { transaction });
 
         await transaction.commit();
         return { id: appointment.id, status: appointment.status };

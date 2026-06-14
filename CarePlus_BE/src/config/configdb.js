@@ -156,6 +156,7 @@ const ensureCatalogSchema = async () => {
         "patient_vouchers",
         "appointments",
         "relative_profiles",
+        "notifications",
     ];
     const missingTables = requiredTables.filter((table) => !tables.includes(table));
 

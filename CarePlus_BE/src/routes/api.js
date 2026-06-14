@@ -5,6 +5,7 @@ import publicCatalogController from "../controllers/publicCatalogController";
 import adminCatalogController from "../controllers/adminCatalogController";
 import appointmentController from "../controllers/appointmentController";
 import relativeProfileController from "../controllers/relativeProfileController";
+import notificationController from "../controllers/notificationController";
 
 let router = express.Router();
 
@@ -16,6 +17,7 @@ router.get("/api/public/doctors/:slugOrId", publicCatalogController.getDoctorDet
 router.get("/api/public/doctors/:slugOrId/available-slots", publicCatalogController.getDoctorAvailableSlots);
 router.get("/api/public/articles", publicCatalogController.getArticles);
 router.get("/api/public/articles/:slugOrId", publicCatalogController.getArticleDetail);
+router.get("/api/notifications/stream", notificationController.streamNotifications);
 
 router.get("/api/profile/me", authMiddleware.verifyToken, userApiController.getMyProfile);
 router.put("/api/profile/me", authMiddleware.verifyToken, userApiController.updateMyProfile);
@@ -30,6 +32,9 @@ router.get("/api/relatives/my", authMiddleware.verifyToken, relativeProfileContr
 router.post("/api/relatives", authMiddleware.verifyToken, relativeProfileController.createRelative);
 router.put("/api/relatives/:id", authMiddleware.verifyToken, relativeProfileController.updateRelative);
 router.delete("/api/relatives/:id", authMiddleware.verifyToken, relativeProfileController.deleteRelative);
+router.get("/api/notifications", authMiddleware.verifyToken, notificationController.getMyNotifications);
+router.post("/api/notifications/:id/read", authMiddleware.verifyToken, notificationController.markNotificationRead);
+router.post("/api/notifications/read-all", authMiddleware.verifyToken, notificationController.markAllNotificationsRead);
 
 router.use("/api/users", authMiddleware.verifyToken, authMiddleware.requireRole("admin"));
 router.get("/api/users", userApiController.getAllUsers);

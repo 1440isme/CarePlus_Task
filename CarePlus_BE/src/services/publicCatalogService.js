@@ -551,14 +551,49 @@ const getAdminDashboardData = async () => {
         include: [{ model: db.Specialty, as: "specialty" }]
     });
     const allDocs = await db.Doctor.findAll();
+    const appointments = await db.Appointment.findAll({
+        include: [{
+            model: db.Doctor,
+            as: "doctor",
+            include: [{ model: db.Specialty, as: "specialty" }],
+        }],
+        order: [["appointmentDate", "ASC"], ["startTime", "ASC"]],
+    });
 
-    const totalBookings = allDocs.reduce((total, item) => total + (item.bookedCount || 0), 0);
+    const totalBookings = appointments.length;
     const averageFee = activeDocs.length
         ? Math.round(activeDocs.reduce((total, item) => total + (item.consultationFee || 0), 0) / activeDocs.length)
         : 0;
     const averageRating = activeDocs.length
         ? Number((activeDocs.reduce((total, item) => total + (item.rating || 0), 0) / activeDocs.length).toFixed(1))
         : 0;
+    const appointmentStatusCounts = appointments.reduce((acc, item) => {
+        acc[item.status] = (acc[item.status] || 0) + 1;
+        return acc;
+    }, {});
+    const estimatedRevenue = appointments
+        .filter((item) => ["CONFIRMED", "COMPLETED"].includes(item.status))
+        .reduce((sum, item) => sum + (item.doctor?.consultationFee || 0), 0);
+    const today = new Date();
+    const chartDays = Array.from({ length: 7 }, (_, index) => {
+        const date = new Date(today);
+        date.setDate(today.getDate() - (6 - index));
+        return date.toISOString().slice(0, 10);
+    });
+    const chartMap = chartDays.reduce((acc, date) => {
+        acc[date] = 0;
+        return acc;
+    }, {});
+    appointments.forEach((item) => {
+        if (chartMap[item.appointmentDate] !== undefined) {
+            chartMap[item.appointmentDate] += 1;
+        }
+    });
+    const appointmentChart = chartDays.map((date) => ({
+        date,
+        label: new Date(date).toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit" }),
+        value: chartMap[date],
+    }));
 
     const allSpecs = await db.Specialty.findAll();
     const topSpecsRaw = await Promise.all(allSpecs.map(async (spec) => {
@@ -570,8 +605,19 @@ const getAdminDashboardData = async () => {
         };
     }));
     const topSpecialties = topSpecsRaw.sort((a, b) => b.doctorCount - a.doctorCount).slice(0, 4);
-
-    const recentDoctorsRaw = [...activeDocs].sort((a, b) => b.bookedCount - a.bookedCount).slice(0, 5);
+    const doctorBookingMap = appointments.reduce((acc, item) => {
+        const doctorId = item.doctor?.id;
+        if (!doctorId) return acc;
+        acc[doctorId] = (acc[doctorId] || 0) + 1;
+        return acc;
+    }, {});
+    const recentDoctorsRaw = [...activeDocs]
+        .sort((a, b) => (doctorBookingMap[b.id] || 0) - (doctorBookingMap[a.id] || 0))
+        .slice(0, 5);
+    const recentNotifications = await db.Notification.findAll({
+        order: [["createdAt", "DESC"]],
+        limit: 5,
+    });
 
     return {
         stats: [
@@ -589,9 +635,9 @@ const getAdminDashboardData = async () => {
             },
             {
                 key: "bookings",
-                title: "Tổng lượt đặt lịch mẫu",
+                title: "Tổng lượt đặt lịch",
                 value: totalBookings,
-                description: "Dùng để minh họa dữ liệu quản trị hiện tại.",
+                description: "Tính trực tiếp từ bảng lịch hẹn trong hệ thống.",
             },
             {
                 key: "rating",
@@ -608,6 +654,7 @@ const getAdminDashboardData = async () => {
         ],
         highlights: {
             averageFee,
+            estimatedRevenue,
             pendingDoctorProfiles: allDocs.filter((item) => !item.isActive).length,
             featuredDoctors: activeDocs.filter((item) => item.isFeatured).length,
             topSpecialties,
@@ -616,8 +663,17 @@ const getAdminDashboardData = async () => {
             totalAdmins,
             bookingLockedUsers,
             totalNoShows,
+            appointmentStatusCounts,
         },
-        recentDoctors: recentDoctorsRaw.map(d => enrichDoctor(d.toJSON()))
+        appointmentChart,
+        recentDoctors: recentDoctorsRaw.map(d => enrichDoctor(d.toJSON())),
+        recentNotifications: recentNotifications.map((item) => ({
+            id: item.id,
+            title: item.title,
+            message: item.message,
+            type: item.type,
+            createdAt: item.createdAt,
+        })),
     };
 };
 
