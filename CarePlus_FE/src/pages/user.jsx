@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import {
-    BellOutlined,
     CalendarOutlined,
     DeleteOutlined,
     EditOutlined,
@@ -18,6 +17,7 @@ import {
 } from "@ant-design/icons";
 import { message } from "antd";
 import FormField from "../components/ui/FormField";
+import NotificationBell from "../components/ui/NotificationBell";
 import SubmitButton from "../components/ui/SubmitButton";
 import { logout, updateProfile } from "../store/slices/authSlice";
 import {
@@ -951,13 +951,7 @@ const UserProfilePage = () => {
                                         <span>Thêm người thân</span>
                                     </button>
                                 ) : null}
-                                <button
-                                    type="button"
-                                    className="relative flex h-9 w-9 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-50"
-                                >
-                                    <BellOutlined className="text-base" />
-                                    <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-red-500" />
-                                </button>
+                                <NotificationBell />
                             </div>
                         </header>
 

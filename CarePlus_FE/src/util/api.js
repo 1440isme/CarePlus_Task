@@ -61,6 +61,18 @@ export const deleteRelativeApi = (relativeId) => {
     return axios.delete(`/api/relatives/${relativeId}`);
 };
 
+export const getMyNotificationsApi = () => {
+    return axios.get("/api/notifications");
+};
+
+export const markNotificationReadApi = (notificationId) => {
+    return axios.post(`/api/notifications/${notificationId}/read`);
+};
+
+export const markAllNotificationsReadApi = () => {
+    return axios.post("/api/notifications/read-all");
+};
+
 /**
  * Đăng nhập
  * POST /auth/login

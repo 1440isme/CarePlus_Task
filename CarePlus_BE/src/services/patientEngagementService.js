@@ -1,5 +1,6 @@
 import db from "../models/index";
 import CRUDService from "./CRUDService";
+import notificationService from "./notificationService";
 
 const REVIEW_REWARD_POINTS = 50;
 const REVIEW_VOUCHER_DISCOUNT = 50000;
@@ -254,6 +255,21 @@ const submitDoctorReview = async (userId, payload = {}) => {
         }, { transaction });
 
         await recalculateDoctorRating(doctor.id, transaction);
+
+        await notificationService.createForUsers([userId], {
+            title: "Nhận thưởng sau đánh giá",
+            message: `Bạn vừa nhận ${REVIEW_REWARD_POINTS} điểm và voucher ${voucherCode} sau khi đánh giá bác sĩ ${doctor.fullName}.`,
+            type: "review_reward",
+            link: "/user/profile",
+        }, { transaction });
+
+        await notificationService.notifyAdmins({
+            title: "Đánh giá mới từ bệnh nhân",
+            message: `${user.username || user.email} vừa đánh giá bác sĩ ${doctor.fullName} ${rating}/5 sao.`,
+            type: "review_new",
+            link: "/admin/dashboard",
+        }, { transaction });
+
         await transaction.commit();
 
         return {
