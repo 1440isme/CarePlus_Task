@@ -17,6 +17,50 @@ export const updateMyProfile = (data) => {
     return axios.put("/api/profile/me", data);
 };
 
+export const getMyEngagement = () => {
+    return axios.get("/api/profile/engagement");
+};
+
+export const toggleFavoriteDoctorApi = (doctorId) => {
+    return axios.post(`/api/profile/favorite-doctors/${doctorId}/toggle`);
+};
+
+export const submitDoctorReviewApi = (payload) => {
+    return axios.post("/api/profile/doctor-reviews", payload);
+};
+
+export const trackDoctorViewApi = (slugOrId) => {
+    return axios.post(`/api/profile/recent-views/doctors/${slugOrId}`);
+};
+
+export const createAppointmentApi = (payload) => {
+    return axios.post("/api/appointments", payload);
+};
+
+export const getMyAppointmentsApi = () => {
+    return axios.get("/api/appointments/my");
+};
+
+export const cancelAppointmentApi = (appointmentId) => {
+    return axios.patch(`/api/appointments/${appointmentId}/cancel`);
+};
+
+export const getMyRelativesApi = () => {
+    return axios.get("/api/relatives/my");
+};
+
+export const createRelativeApi = (payload) => {
+    return axios.post("/api/relatives", payload);
+};
+
+export const updateRelativeApi = (relativeId, payload) => {
+    return axios.put(`/api/relatives/${relativeId}`, payload);
+};
+
+export const deleteRelativeApi = (relativeId) => {
+    return axios.delete(`/api/relatives/${relativeId}`);
+};
+
 /**
  * Đăng nhập
  * POST /auth/login

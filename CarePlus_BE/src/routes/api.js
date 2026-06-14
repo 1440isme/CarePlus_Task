@@ -3,6 +3,8 @@ import authMiddleware from "../middlewares/authMiddleware";
 import userApiController from "../controllers/userApiController";
 import publicCatalogController from "../controllers/publicCatalogController";
 import adminCatalogController from "../controllers/adminCatalogController";
+import appointmentController from "../controllers/appointmentController";
+import relativeProfileController from "../controllers/relativeProfileController";
 
 let router = express.Router();
 
@@ -17,6 +19,17 @@ router.get("/api/public/articles/:slugOrId", publicCatalogController.getArticleD
 
 router.get("/api/profile/me", authMiddleware.verifyToken, userApiController.getMyProfile);
 router.put("/api/profile/me", authMiddleware.verifyToken, userApiController.updateMyProfile);
+router.get("/api/profile/engagement", authMiddleware.verifyToken, userApiController.getMyEngagement);
+router.post("/api/profile/favorite-doctors/:doctorId/toggle", authMiddleware.verifyToken, userApiController.toggleFavoriteDoctor);
+router.post("/api/profile/doctor-reviews", authMiddleware.verifyToken, userApiController.submitDoctorReview);
+router.post("/api/profile/recent-views/doctors/:slugOrId", authMiddleware.verifyToken, userApiController.trackDoctorView);
+router.get("/api/appointments/my", authMiddleware.verifyToken, appointmentController.getMyAppointments);
+router.post("/api/appointments", authMiddleware.verifyToken, appointmentController.createAppointment);
+router.patch("/api/appointments/:id/cancel", authMiddleware.verifyToken, appointmentController.cancelAppointment);
+router.get("/api/relatives/my", authMiddleware.verifyToken, relativeProfileController.listMyRelatives);
+router.post("/api/relatives", authMiddleware.verifyToken, relativeProfileController.createRelative);
+router.put("/api/relatives/:id", authMiddleware.verifyToken, relativeProfileController.updateRelative);
+router.delete("/api/relatives/:id", authMiddleware.verifyToken, relativeProfileController.deleteRelative);
 
 router.use("/api/users", authMiddleware.verifyToken, authMiddleware.requireRole("admin"));
 router.get("/api/users", userApiController.getAllUsers);

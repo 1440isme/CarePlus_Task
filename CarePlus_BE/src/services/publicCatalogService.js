@@ -1,4 +1,6 @@
 import db from "../models/index";
+import appointmentService from "./appointmentService";
+import patientEngagementService from "./patientEngagementService";
 
 const CLINIC_INFO = {
     name: "CarePlus Clinic",
@@ -125,45 +127,6 @@ const sortByQuery = (items, sort) => {
         default:
             return list;
     }
-};
-
-const buildSlotsForDoctor = (doctor, dateString) => {
-    const date = new Date(dateString);
-    if (Number.isNaN(date.getTime())) {
-        return [];
-    }
-
-    const day = date.getDay();
-    const availabilityDays = Array.isArray(doctor.availabilityDays)
-        ? doctor.availabilityDays
-        : JSON.parse(doctor.availabilityDays || "[]");
-
-    if (!availabilityDays.includes(day)) {
-        return [];
-    }
-
-    const shiftSlots = {
-        MORNING: ["08:00", "08:30", "09:00", "09:30", "10:00", "10:30", "11:00"],
-        AFTERNOON: ["13:30", "14:00", "14:30", "15:00", "15:30", "16:00", "16:30"],
-    };
-
-    const shifts = Array.isArray(doctor.shifts)
-        ? doctor.shifts
-        : JSON.parse(doctor.shifts || "[]");
-
-    const slots = shifts.flatMap((shift) => shiftSlots[shift] || []);
-    const limited = slots.slice(0, Math.max(doctor.availableSlotsToday, 1));
-
-    return limited.map((startTime) => {
-        const [hour, minute] = startTime.split(":").map(Number);
-        const end = new Date(date);
-        end.setHours(hour, minute + 30, 0, 0);
-        return {
-            startTime,
-            endTime: `${String(end.getHours()).padStart(2, "0")}:${String(end.getMinutes()).padStart(2, "0")}`,
-            available: true,
-        };
-    });
 };
 
 const getSpecialtyById = async (specialtyId) => {
@@ -418,7 +381,13 @@ const listDoctors = async (query = {}) => {
 
     let results = list.map(item => enrichDoctor(item.toJSON()));
     if (query.date) {
-        results = results.filter(doctor => buildSlotsForDoctor(doctor, query.date).length > 0);
+        const doctorWithSlots = await Promise.all(results.map(async (doctor) => ({
+            doctor,
+            slots: await appointmentService.getAvailableSlotsForDoctor(doctor, query.date),
+        })));
+        results = doctorWithSlots
+            .filter(({ slots }) => slots.some((slot) => slot.available))
+            .map(({ doctor }) => doctor);
     }
     return {
         items: results,
@@ -453,14 +422,22 @@ const getDoctorDetail = async (slugOrId) => {
         const dateString = date.toISOString().slice(0, 10);
         return {
             date: dateString,
-            slots: buildSlotsForDoctor(enriched, dateString),
+            slots: [],
         };
     });
+
+    const hydratedSchedules = await Promise.all(nextThreeDays.map(async (item) => ({
+        ...item,
+        slots: await appointmentService.getAvailableSlotsForDoctor(enriched, item.date),
+    })));
+
+    const engagement = await patientEngagementService.getDoctorEngagementSummary(doctor.id);
 
     return {
         ...enriched,
         relatedDoctors: related.map(r => enrichDoctor(r.toJSON())),
-        schedules: nextThreeDays
+        schedules: hydratedSchedules,
+        engagement,
     };
 };
 
@@ -509,7 +486,7 @@ const getAvailableSlots = async (slugOrId, date) => {
     where.is_active = true;
     const doctor = await db.Doctor.findOne({ where });
     if (!doctor) return null;
-    return buildSlotsForDoctor(doctor.toJSON(), date);
+    return appointmentService.getAvailableSlotsForDoctor(doctor.toJSON(), date);
 };
 
 const getHomeData = async () => {

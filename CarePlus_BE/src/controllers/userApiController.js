@@ -1,4 +1,5 @@
 import CRUDService from "../services/CRUDService";
+import patientEngagementService from "../services/patientEngagementService";
 
 let getAllUsers = async (req, res) => {
     try {
@@ -123,6 +124,66 @@ let deleteUser = async (req, res) => {
     }
 };
 
+let getMyEngagement = async (req, res) => {
+    try {
+        const data = await patientEngagementService.getMyEngagement(req.user.id);
+        return res.status(200).json({
+            success: true,
+            data,
+        });
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Không thể tải dữ liệu tương tác của bệnh nhân",
+        });
+    }
+};
+
+let toggleFavoriteDoctor = async (req, res) => {
+    try {
+        const data = await patientEngagementService.toggleFavoriteDoctor(req.user.id, req.params.doctorId);
+        return res.status(200).json({
+            success: true,
+            data,
+        });
+    } catch (error) {
+        return res.status(error.status || 400).json({
+            success: false,
+            message: error.message || "Không thể cập nhật bác sĩ yêu thích",
+        });
+    }
+};
+
+let submitDoctorReview = async (req, res) => {
+    try {
+        const data = await patientEngagementService.submitDoctorReview(req.user.id, req.body);
+        return res.status(201).json({
+            success: true,
+            data,
+            message: "Đánh giá thành công. Điểm thưởng và ưu đãi đã được cộng vào tài khoản.",
+        });
+    } catch (error) {
+        return res.status(400).json({
+            success: false,
+            message: error.message || "Không thể gửi đánh giá",
+        });
+    }
+};
+
+let trackDoctorView = async (req, res) => {
+    try {
+        await patientEngagementService.trackDoctorView(req.user.id, req.params.slugOrId);
+        return res.status(200).json({
+            success: true,
+        });
+    } catch (error) {
+        return res.status(error.status || 400).json({
+            success: false,
+            message: error.message || "Không thể lưu lịch sử xem",
+        });
+    }
+};
+
 module.exports = {
     getAllUsers,
     getUserById,
@@ -131,4 +192,8 @@ module.exports = {
     getMyProfile,
     updateMyProfile,
     deleteUser,
+    getMyEngagement,
+    toggleFavoriteDoctor,
+    submitDoctorReview,
+    trackDoctorView,
 };
