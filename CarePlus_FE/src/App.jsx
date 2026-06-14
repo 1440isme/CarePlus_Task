@@ -1,16 +1,27 @@
 import { useEffect } from "react";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
+import { LoadingOutlined } from "@ant-design/icons";
 import { fetchCurrentUser } from "./store/slices/authSlice";
 import Header from "./components/layout/header";
+import HomePage from "./pages/home";
 import LoginPage from "./pages/login";
 import RegisterPage from "./pages/register";
 import ForgotPasswordPage from "./pages/forgotPassword";
+import SpecialtiesPage from "./pages/specialties";
+import SpecialtyDetailPage from "./pages/specialtyDetail";
+import DoctorsPage from "./pages/doctors";
+import DoctorDetailPage from "./pages/doctorDetail";
+import ArticlesPage from "./pages/articles";
+import ArticleDetailPage from "./pages/articleDetail";
+import AdminDashboardPage from "./pages/adminDashboard";
+import AdminSpecialtiesPage from "./pages/adminSpecialties";
+import AdminDoctorsPage from "./pages/adminDoctors";
 import AdminUsersPage from "./pages/adminUsers";
 import UserProfilePage from "./pages/user";
 
 const getProfileRouteByRole = (role) => {
-    return role === "admin" ? "/admin/profile" : "/user/profile";
+    return role === "admin" ? "/admin/dashboard" : "/user/profile";
 };
 
 const ProtectedRoute = ({ children, roles }) => {
@@ -18,9 +29,9 @@ const ProtectedRoute = ({ children, roles }) => {
 
     if (loading) {
         return (
-            <div className="app-loading">
-                <div className="app-loading__spinner" />
-                <span>Đang tải...</span>
+            <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 text-slate-500">
+                <LoadingOutlined className="text-3xl text-slate-700" />
+                <span className="text-sm font-medium">Đang tải...</span>
             </div>
         );
     }
@@ -41,9 +52,9 @@ const PublicOnlyRoute = ({ children }) => {
 
     if (loading) {
         return (
-            <div className="app-loading">
-                <div className="app-loading__spinner" />
-                <span>Đang tải...</span>
+            <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 text-slate-500">
+                <LoadingOutlined className="text-3xl text-slate-700" />
+                <span className="text-sm font-medium">Đang tải...</span>
             </div>
         );
     }
@@ -57,6 +68,15 @@ const PublicOnlyRoute = ({ children }) => {
 
 const AppRoutes = () => {
     const dispatch = useDispatch();
+    const location = useLocation();
+    const authRoutes = ["/login", "/register", "/forgot-password"];
+    const publicRoutes = ["/", "/specialties", "/doctors", "/articles"];
+    const dashboardRoutes = ["/user/profile", "/admin"];
+    const isPublicRoute = publicRoutes.some((route) => location.pathname === route || location.pathname.startsWith(`${route}/`));
+    const isDashboardRoute = dashboardRoutes.some((route) => location.pathname === route || location.pathname.startsWith(`${route}/`));
+    const isAuthRoute = authRoutes.includes(location.pathname);
+    const isFullScreenRoute = isAuthRoute || isDashboardRoute || isPublicRoute;
+    const hideHeader = isFullScreenRoute;
 
     useEffect(() => {
         dispatch(fetchCurrentUser());
@@ -64,21 +84,21 @@ const AppRoutes = () => {
 
     return (
         <div className="app-wrapper">
-            <Header />
-            <main className="app-content">
+            {!hideHeader ? <Header /> : null}
+            <main className={isFullScreenRoute ? "w-full flex-1" : "mx-auto w-full max-w-7xl flex-1 px-4 py-8 sm:px-6 lg:px-8"}>
                 <Routes>
-                    {/* Trang chủ tạm thời */}
                     <Route
                         path="/"
-                        element={
-                            <div className="placeholder-page">
-                                <h1>Chào mừng đến CarePlus</h1>
-                                <p>Ứng dụng quản lý sức khỏe của bạn</p>
-                            </div>
-                        }
+                        element={<HomePage />}
                     />
 
-                    {/* Trang Login tạm thời */}
+                    <Route path="/specialties" element={<SpecialtiesPage />} />
+                    <Route path="/specialties/:slugOrId" element={<SpecialtyDetailPage />} />
+                    <Route path="/doctors" element={<DoctorsPage />} />
+                    <Route path="/doctors/:slugOrId" element={<DoctorDetailPage />} />
+                    <Route path="/articles" element={<ArticlesPage />} />
+                    <Route path="/articles/:slugOrId" element={<ArticleDetailPage />} />
+
                     <Route
                         path="/login"
                         element={
@@ -120,6 +140,33 @@ const AppRoutes = () => {
                         element={
                             <ProtectedRoute roles={["admin"]}>
                                 <UserProfilePage />
+                            </ProtectedRoute>
+                        }
+                    />
+
+                    <Route
+                        path="/admin/dashboard"
+                        element={
+                            <ProtectedRoute roles={["admin"]}>
+                                <AdminDashboardPage />
+                            </ProtectedRoute>
+                        }
+                    />
+
+                    <Route
+                        path="/admin/specialties"
+                        element={
+                            <ProtectedRoute roles={["admin"]}>
+                                <AdminSpecialtiesPage />
+                            </ProtectedRoute>
+                        }
+                    />
+
+                    <Route
+                        path="/admin/doctors"
+                        element={
+                            <ProtectedRoute roles={["admin"]}>
+                                <AdminDoctorsPage />
                             </ProtectedRoute>
                         }
                     />

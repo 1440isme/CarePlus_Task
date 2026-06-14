@@ -4,7 +4,42 @@ const { Model } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
     class User extends Model {
         static associate(models) {
-            // Định nghĩa quan hệ ở đây nếu có (ví dụ: User hasMany Bookings)
+            User.hasOne(models.PatientProfile, {
+                foreignKey: "userId",
+                as: "patientProfile",
+            });
+            User.hasMany(models.DoctorReview, {
+                foreignKey: "userId",
+                as: "doctorReviews",
+            });
+            User.hasMany(models.FavoriteDoctor, {
+                foreignKey: "userId",
+                as: "favoriteDoctors",
+            });
+            User.hasMany(models.DoctorViewHistory, {
+                foreignKey: "userId",
+                as: "doctorViewHistory",
+            });
+            User.hasOne(models.PatientRewardWallet, {
+                foreignKey: "userId",
+                as: "rewardWallet",
+            });
+            User.hasMany(models.PatientVoucher, {
+                foreignKey: "userId",
+                as: "vouchers",
+            });
+            User.hasMany(models.Appointment, {
+                foreignKey: "userId",
+                as: "appointments",
+            });
+            User.hasMany(models.RelativeProfile, {
+                foreignKey: "userId",
+                as: "relativeProfiles",
+            });
+            User.hasMany(models.Notification, {
+                foreignKey: "userId",
+                as: "notifications",
+            });
         }
     }
     User.init({

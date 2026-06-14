@@ -17,6 +17,62 @@ export const updateMyProfile = (data) => {
     return axios.put("/api/profile/me", data);
 };
 
+export const getMyEngagement = () => {
+    return axios.get("/api/profile/engagement");
+};
+
+export const toggleFavoriteDoctorApi = (doctorId) => {
+    return axios.post(`/api/profile/favorite-doctors/${doctorId}/toggle`);
+};
+
+export const submitDoctorReviewApi = (payload) => {
+    return axios.post("/api/profile/doctor-reviews", payload);
+};
+
+export const trackDoctorViewApi = (slugOrId) => {
+    return axios.post(`/api/profile/recent-views/doctors/${slugOrId}`);
+};
+
+export const createAppointmentApi = (payload) => {
+    return axios.post("/api/appointments", payload);
+};
+
+export const getMyAppointmentsApi = () => {
+    return axios.get("/api/appointments/my");
+};
+
+export const cancelAppointmentApi = (appointmentId) => {
+    return axios.patch(`/api/appointments/${appointmentId}/cancel`);
+};
+
+export const getMyRelativesApi = () => {
+    return axios.get("/api/relatives/my");
+};
+
+export const createRelativeApi = (payload) => {
+    return axios.post("/api/relatives", payload);
+};
+
+export const updateRelativeApi = (relativeId, payload) => {
+    return axios.put(`/api/relatives/${relativeId}`, payload);
+};
+
+export const deleteRelativeApi = (relativeId) => {
+    return axios.delete(`/api/relatives/${relativeId}`);
+};
+
+export const getMyNotificationsApi = () => {
+    return axios.get("/api/notifications");
+};
+
+export const markNotificationReadApi = (notificationId) => {
+    return axios.post(`/api/notifications/${notificationId}/read`);
+};
+
+export const markAllNotificationsReadApi = () => {
+    return axios.post("/api/notifications/read-all");
+};
+
 /**
  * Đăng nhập
  * POST /auth/login
@@ -70,6 +126,40 @@ export const getCurrentSession = () => {
     return axios.get("/auth/me");
 };
 
+export const getPublicHomeData = () => {
+    return axios.get("/api/public/home");
+};
+
+export const getSpecialties = (params) => {
+    return axios.get("/api/public/specialties", { params });
+};
+
+export const getSpecialtyDetail = (slugOrId) => {
+    return axios.get(`/api/public/specialties/${slugOrId}`);
+};
+
+export const getDoctors = (params) => {
+    return axios.get("/api/public/doctors", { params });
+};
+
+export const getDoctorDetail = (slugOrId) => {
+    return axios.get(`/api/public/doctors/${slugOrId}`);
+};
+
+export const getDoctorAvailableSlots = (slugOrId, date) => {
+    return axios.get(`/api/public/doctors/${slugOrId}/available-slots`, {
+        params: { date },
+    });
+};
+
+export const getArticles = (params) => {
+    return axios.get("/api/public/articles", { params });
+};
+
+export const getArticleDetail = (slugOrId) => {
+    return axios.get(`/api/public/articles/${slugOrId}`);
+};
+
 export const getAllUsers = () => {
     return axios.get("/api/users");
 };
@@ -88,4 +178,68 @@ export const updateUserApi = (userId, data) => {
 
 export const deleteUserApi = (userId) => {
     return axios.delete(`/api/users/${userId}`);
+};
+
+export const getAdminDashboard = () => {
+    return axios.get("/api/admin/dashboard");
+};
+
+export const getAdminSpecialties = (params) => {
+    return axios.get("/api/admin/specialties", { params });
+};
+
+export const createAdminSpecialty = (data) => {
+    return axios.post("/api/admin/specialties", data);
+};
+
+export const updateAdminSpecialty = (specialtyId, data) => {
+    return axios.put(`/api/admin/specialties/${specialtyId}`, data);
+};
+
+export const deleteAdminSpecialty = (specialtyId) => {
+    return axios.delete(`/api/admin/specialties/${specialtyId}`);
+};
+
+export const getAdminDoctors = (params) => {
+    return axios.get("/api/admin/doctors", { params });
+};
+
+export const createAdminDoctor = (data) => {
+    return axios.post("/api/admin/doctors", data);
+};
+
+export const updateAdminDoctor = (doctorId, data) => {
+    return axios.put(`/api/admin/doctors/${doctorId}`, data);
+};
+
+export const deleteAdminDoctor = (doctorId) => {
+    return axios.delete(`/api/admin/doctors/${doctorId}`);
+};
+
+export const getAdminUsers = (params) => {
+    return axios.get("/api/admin/users", { params });
+};
+
+export const createAdminUser = (data) => {
+    return axios.post("/api/admin/users", data);
+};
+
+export const updateAdminUser = (userId, data) => {
+    return axios.put(`/api/admin/users/${userId}`, data);
+};
+
+export const deleteAdminUser = (userId) => {
+    return axios.delete(`/api/admin/users/${userId}`);
+};
+
+export const toggleAdminUserLock = (userId, locked) => {
+    return axios.post(`/api/admin/users/${userId}/toggle-lock`, { locked });
+};
+
+export const toggleAdminUserBookingLock = (userId, payload) => {
+    return axios.post(`/api/admin/users/${userId}/toggle-booking-lock`, payload);
+};
+
+export const resetAdminUserNoShow = (userId) => {
+    return axios.post(`/api/admin/users/${userId}/reset-no-show`);
 };

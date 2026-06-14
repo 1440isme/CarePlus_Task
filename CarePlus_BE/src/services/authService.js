@@ -3,6 +3,7 @@ import { Op } from "sequelize";
 import db from "../models/index";
 import jwtUtils from "../utils/jwt";
 import mailService from "./mailService";
+import CRUDService from "./CRUDService";
 
 const OTP_LENGTH = 5;
 const OTP_EXPIRE_MINUTES = 5;
@@ -121,6 +122,7 @@ let registerUser = async ({ username, email, password, verificationCode }) => {
     user.otpExpiresAt = null;
     user.failedLoginAttempts = 0;
     await user.save();
+    await CRUDService.ensurePatientProfile(user);
     return { success: true, message: "Đăng ký thành công!" };
 };
 
@@ -248,7 +250,7 @@ let getCurrentUser = async (userId) => {
         throw buildLoginError("Tài khoản chưa được xác thực", 403);
     }
 
-    return sanitizeUser(user);
+    return CRUDService.getUserInfoById(userId);
 };
 
 let forgotPassword = async (email) => {
