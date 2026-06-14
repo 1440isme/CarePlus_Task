@@ -8,6 +8,34 @@ module.exports = (sequelize, DataTypes) => {
                 foreignKey: "userId",
                 as: "patientProfile",
             });
+            User.hasMany(models.DoctorReview, {
+                foreignKey: "userId",
+                as: "doctorReviews",
+            });
+            User.hasMany(models.FavoriteDoctor, {
+                foreignKey: "userId",
+                as: "favoriteDoctors",
+            });
+            User.hasMany(models.DoctorViewHistory, {
+                foreignKey: "userId",
+                as: "doctorViewHistory",
+            });
+            User.hasOne(models.PatientRewardWallet, {
+                foreignKey: "userId",
+                as: "rewardWallet",
+            });
+            User.hasMany(models.PatientVoucher, {
+                foreignKey: "userId",
+                as: "vouchers",
+            });
+            User.hasMany(models.Appointment, {
+                foreignKey: "userId",
+                as: "appointments",
+            });
+            User.hasMany(models.RelativeProfile, {
+                foreignKey: "userId",
+                as: "relativeProfiles",
+            });
         }
     }
     User.init({

@@ -144,7 +144,19 @@ const ensureCatalogSchema = async () => {
         return String(entry).toLowerCase();
     });
 
-    const requiredTables = ["users", "patient_profiles", "specialties", "doctors"];
+    const requiredTables = [
+        "users",
+        "patient_profiles",
+        "specialties",
+        "doctors",
+        "doctor_reviews",
+        "favorite_doctors",
+        "doctor_view_histories",
+        "patient_reward_wallets",
+        "patient_vouchers",
+        "appointments",
+        "relative_profiles",
+    ];
     const missingTables = requiredTables.filter((table) => !tables.includes(table));
 
     if (missingTables.length > 0) {
